@@ -4,7 +4,7 @@ namespace UXBackgroundWorker
 {
     public abstract class BaseWorker : IWorker
     {
-        public ILogger Logger { get; set; }
+        //public ILogger Logger { get; set; }
         protected bool KeepRunning;
 
         public BaseWorker() { }

@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using Ninject.Extensions.Conventions;
+using Microsoft.WindowsAzure.ServiceRuntime;
 using Ninject;
 using Ninject.Extensions.Azure;
 using System;
@@ -21,12 +22,19 @@ namespace UXBackgroundWorker
 
         protected abstract void ErrorLogging(string message, Exception e = null);
         protected abstract void InfoLogging(string message);
+        protected Assembly Assembly { get { return System.Reflection.Assembly.GetExecutingAssembly(); } }
 
         protected override IKernel CreateKernel()
         {
             var kernel = new StandardKernel();
-
             this.Kernel = kernel;
+
+            kernel.Bind(x => x
+                   .From(AppDomain.CurrentDomain.GetAssemblies())
+                   .SelectAllClasses()
+                   .InheritedFrom<IWorker>()
+                   .BindSingleInterface());
+
             return kernel;
         }
 
