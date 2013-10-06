@@ -7,24 +7,26 @@ namespace UXBackgroundWorker
 {
     public abstract class BaseServiceBusWorker : BaseWorker
     {
+        protected abstract string ConnectionString { get; }
         protected abstract void Do(string message);
         protected abstract string TopicName { get; }
-        protected abstract void ErrorLogging(string message, string messageId = "", Exception e = null);
-        protected abstract void InfoLogging(string message, string messageId = "");
-        protected abstract void DebugLogging(string message, string messageId = "", double timerValue = 0.0);
-        protected abstract string ConnectionString { get; }
+
+        protected virtual void ErrorLogging(string message, string messageId = "", Exception e = null) { }
+        protected virtual void InfoLogging(string message, string messageId = "") { }
+        protected virtual void DebugLogging(string message, string messageId = "", double timerValue = 0.0) { }
+
+        protected int MessageRepostMaxCount { get; set; }
 
         private string SubscriptionName { get { return this.GetType().Name; } }
-        
+
         public BaseServiceBusWorker()
         {
             Init();
+            this.MessageRepostMaxCount = 10;
         }
 
         protected virtual void Init()
         {
-            //this.ConnectionString = CloudConfigurationManager.GetSetting("TopicConnectionString");
-
             var namespaceManager = NamespaceManager.CreateFromConnectionString(this.ConnectionString);
 
             if (!namespaceManager.TopicExists(this.TopicName))
@@ -72,7 +74,7 @@ namespace UXBackgroundWorker
                         stopWatch.Stop();
                         this.ErrorLogging(string.Format("{0} Failed to process message.", this.SubscriptionName), message.MessageId, e);
 
-                        if (messageCount < 10)
+                        if (messageCount < this.MessageRepostMaxCount)
                         {
                             messageCount++;
 
