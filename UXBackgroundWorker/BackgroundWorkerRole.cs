@@ -36,6 +36,12 @@ namespace UXBackgroundWorker
                    .InheritedFrom<IWorker>()
                    .BindSingleInterface());
 
+            kernel.Bind(x => x
+                   .From(AppDomain.CurrentDomain.GetAssemblies())
+                   .SelectAllClasses()
+                   .InheritedFrom<IStartupTask>()
+                   .BindSingleInterface());
+
             return kernel;
         }
 
