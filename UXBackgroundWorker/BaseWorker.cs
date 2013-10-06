@@ -1,10 +1,8 @@
-﻿using Ninject.Extensions.UXRiskLogger;
-
+﻿
 namespace UXBackgroundWorker
 {
     public abstract class BaseWorker : IWorker
     {
-        //public ILogger Logger { get; set; }
         protected bool KeepRunning;
 
         public BaseWorker() { }
