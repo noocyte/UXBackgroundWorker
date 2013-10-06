@@ -18,8 +18,10 @@ namespace UXBackgroundWorker
         private List<Task> Tasks { get; set; }
 
         protected IKernel Kernel;
-        protected abstract void ErrorLogging(string message, Exception e = null);
-        protected abstract void InfoLogging(string message);
+        protected virtual void ErrorLogging(string message, Exception e = null)
+        { }
+        protected virtual void InfoLogging(string message)
+        { }
 
         protected virtual int TaskTimeout { get { return 30; } }
 
@@ -77,13 +79,9 @@ namespace UXBackgroundWorker
         {
             // Observe unhandled exception
             if (task.Exception != null)
-            {
                 this.ErrorLogging("Job threw an exception", task.Exception.InnerException);
-            }
             else
-            {
                 this.ErrorLogging("Job failed with no exception");
-            }
         }
 
         protected override bool OnRoleStarted()
