@@ -94,13 +94,16 @@ namespace UXBackgroundWorker
         protected override void OnRoleStopped()
         {
             _cancellationTokenSource.Cancel();
-
-            foreach (var job in this.Processors)
+            
+            if (this.Processors != null)
             {
-                job.Stop();
-                var disposable = job as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
+                foreach (var job in this.Processors)
+                {
+                    job.Stop();
+                    var disposable = job as IDisposable;
+                    if (disposable != null)
+                        disposable.Dispose();
+                }
             }
 
             try
