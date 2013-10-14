@@ -94,7 +94,6 @@ namespace UXBackgroundWorker
         protected override void OnRoleStopped()
         {
             _cancellationTokenSource.Cancel();
-            _safeToExitHandle.WaitOne();
 
             foreach (var job in this.Processors)
             {
@@ -113,6 +112,8 @@ namespace UXBackgroundWorker
                 // Observe any unhandled exceptions.
                 this.ErrorLogging(String.Format("Finalizing exception thrown: {0} exceptions", ex.InnerExceptions.Count), ex);
             }
+
+            _safeToExitHandle.WaitOne();
 
             this.InfoLogging("Worker is stopped");
 

@@ -15,8 +15,10 @@ namespace UXBackgroundWorker
         protected virtual void InfoLogging(string message, string messageId = "") { }
         protected virtual void DebugLogging(string message, string messageId = "", double timerValue = 0.0) { }
 
-        protected int MessageRepostMaxCount { get; set; }
+        protected virtual Func<BrokeredMessage> GetMessage { get; set; }
+        protected virtual Action<BrokeredMessage> SendMessage { get; set; }
 
+        protected int MessageRepostMaxCount { get; set; }
         private string SubscriptionName { get { return this.GetType().Name; } }
 
         public BaseServiceBusWorker()
@@ -34,15 +36,20 @@ namespace UXBackgroundWorker
 
             if (!namespaceManager.SubscriptionExists(this.TopicName, this.SubscriptionName))
                 namespaceManager.CreateSubscription(this.TopicName, this.SubscriptionName);
+
+            // setup delegates to abstract away Service Bus stuff
+            var subClient = SubscriptionClient.CreateFromConnectionString(this.ConnectionString, this.TopicName, this.SubscriptionName);
+            this.GetMessage = subClient.Receive;
+
+            var topicClient = TopicClient.CreateFromConnectionString(this.ConnectionString, this.TopicName);
+            this.SendMessage = topicClient.Send;
         }
 
         protected override void Process()
         {
             InfoLogging(string.Format("{0} - Processing", this.SubscriptionName));
 
-            var subClient = SubscriptionClient.CreateFromConnectionString(this.ConnectionString, this.TopicName, this.SubscriptionName);
-
-            BrokeredMessage message = subClient.Receive();
+            BrokeredMessage message = this.GetMessage();
 
             if (message != null)
             {
@@ -76,9 +83,7 @@ namespace UXBackgroundWorker
 
                         var appendedMessageBody = String.Format("{0}#{1}", messageBody, messageCount);
                         // this means that the message processing has failed and we need to repost the message
-                        var topicClient = TopicClient.CreateFromConnectionString(this.ConnectionString, this.TopicName);
-                        topicClient.Send(new BrokeredMessage(appendedMessageBody));
-
+                        this.SendMessage(new BrokeredMessage(appendedMessageBody));
                         this.ErrorLogging(string.Format("{0} - Reposting the message, retry #: {1}.", this.SubscriptionName, messageCount), message.MessageId, e);
                     }
                     else
