@@ -81,6 +81,10 @@ namespace UXBackgroundWorker
 
                         this.ErrorLogging(string.Format("{0} - Reposting the message, retry #: {1}.", this.SubscriptionName, messageCount), message.MessageId, e);
                     }
+                    else
+                    {
+                        this.ErrorLogging(string.Format("{0} - Done trying to repost message, message has failed to be processed.", this.SubscriptionName));
+                    }
                 }
 
                 if (stopWatch.IsRunning)
