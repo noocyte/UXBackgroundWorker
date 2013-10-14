@@ -45,11 +45,13 @@
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.0.2-unstable-9037\lib\net45-full\Ninject.dll</HintPath>
     </Reference>
-    <Reference Include="Ninject.Extensions.Azure">
-      <HintPath>..\packages\Ninject.Extensions.Azure.3.0.2-unstable-9006\lib\net40-full\Ninject.Extensions.Azure.dll</HintPath>
+    <Reference Include="Ninject.Extensions.Azure, Version=3.0.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Ninject.Extensions.Azure.3.0.2-unstable-9009\lib\net40-full\Ninject.Extensions.Azure.dll</HintPath>
     </Reference>
-    <Reference Include="Ninject.Extensions.Conventions">
-      <HintPath>..\packages\ninject.extensions.conventions.3.0.0.11\lib\net45-full\Ninject.Extensions.Conventions.dll</HintPath>
+    <Reference Include="Ninject.Extensions.Conventions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Ninject.Extensions.Conventions.3.0.2-unstable-9010\lib\net45-full\Ninject.Extensions.Conventions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -68,6 +70,7 @@
     <Compile Include="BackgroundWorkerRole.cs" />
     <Compile Include="BaseServiceBusWorker.cs" />
     <Compile Include="BaseWorker.cs" />
+    <Compile Include="UXBackgroundWorkerModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

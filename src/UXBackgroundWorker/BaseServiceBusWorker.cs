@@ -11,7 +11,7 @@ namespace UXBackgroundWorker
         protected abstract void Do(string message);
         protected abstract string TopicName { get; }
 
-        protected virtual void ErrorLogging(string message, string messageId = "", Exception e = null) { }
+        protected virtual void ErrorLogging(string message, string messageId = "", Exception ex = null) { }
         protected virtual void InfoLogging(string message, string messageId = "") { }
         protected virtual void DebugLogging(string message, string messageId = "", double timerValue = 0.0) { }
 
@@ -38,7 +38,7 @@ namespace UXBackgroundWorker
 
         protected override void Process()
         {
-            InfoLogging(string.Format("{0} Processing", this.SubscriptionName));
+            InfoLogging(string.Format("{0} - Processing", this.SubscriptionName));
 
             var subClient = SubscriptionClient.CreateFromConnectionString(this.ConnectionString, this.TopicName, this.SubscriptionName);
 
@@ -63,7 +63,7 @@ namespace UXBackgroundWorker
 
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    DebugLogging(string.Format("{0} Recieved new message", this.SubscriptionName), message.MessageId);
+                    DebugLogging(string.Format("{0} - Received new message", this.SubscriptionName), message.MessageId);
 
                     try
                     {
@@ -72,7 +72,7 @@ namespace UXBackgroundWorker
                     catch (Exception e)
                     {
                         stopWatch.Stop();
-                        this.ErrorLogging(string.Format("{0} Failed to process message.", this.SubscriptionName), message.MessageId, e);
+                        this.ErrorLogging(string.Format("{0} - Failed to process message.", this.SubscriptionName), message.MessageId, e);
 
                         if (messageCount < this.MessageRepostMaxCount)
                         {
@@ -83,7 +83,7 @@ namespace UXBackgroundWorker
                             var topicClient = TopicClient.CreateFromConnectionString(this.ConnectionString, this.TopicName);
                             topicClient.Send(new BrokeredMessage(appendedMessageBody));
 
-                            this.ErrorLogging(string.Format("{0} Reposting the message, retry #: {1}.", this.SubscriptionName, messageCount), message.MessageId, e);
+                            this.ErrorLogging(string.Format("{0} - Reposting the message, retry #: {1}.", this.SubscriptionName, messageCount), message.MessageId, e);
                         }
                     }
 
@@ -91,7 +91,7 @@ namespace UXBackgroundWorker
                         stopWatch.Stop();
 
                     TimeSpan timeSpan = stopWatch.Elapsed;
-                    DebugLogging(string.Format("{0} Processed message", this.SubscriptionName), message.MessageId, timeSpan.TotalSeconds);
+                    DebugLogging(string.Format("{0} - Processed message", this.SubscriptionName), message.MessageId, timeSpan.TotalSeconds);
                 }
             }
         }

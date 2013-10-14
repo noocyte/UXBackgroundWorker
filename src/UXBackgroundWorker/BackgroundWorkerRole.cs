@@ -1,7 +1,6 @@
 ﻿using Microsoft.WindowsAzure.ServiceRuntime;
 using Ninject;
 using Ninject.Extensions.Azure;
-using Ninject.Extensions.Conventions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,58 +12,50 @@ namespace UXBackgroundWorker
 {
     public abstract class BackgroundWorkerRole : NinjectRoleEntryPoint
     {
-        private bool KeepRunning;
+        private CancellationTokenSource _cancellationTokenSource;
+        private ManualResetEvent _safeToExitHandle;
+
         private IEnumerable<IWorker> Processors { get; set; }
         private List<Task> Tasks { get; set; }
 
-        protected IKernel Kernel;
-        protected virtual void ErrorLogging(string message, Exception e = null)
-        { }
-        protected virtual void InfoLogging(string message)
-        { }
-
+        protected virtual void ErrorLogging(string message, Exception ex = null) { }
+        protected virtual void InfoLogging(string message) { }
         protected virtual int TaskTimeout { get { return 30; } }
+
+        [Inject]
+        public IEnumerable<IStartupTask> Starters { get; set; }
+        [Inject]
+        public IEnumerable<BaseWorker> Workers { get; set; }
 
         protected override IKernel CreateKernel()
         {
-            var kernel = new StandardKernel();
-            this.Kernel = kernel;
-
-            kernel.Bind(x => x
-                   .From(AppDomain.CurrentDomain.GetAssemblies())
-                   .SelectAllClasses()
-                   .InheritedFrom<IWorker>()
-                   .BindSingleInterface());
-
-            kernel.Bind(x => x
-                   .From(AppDomain.CurrentDomain.GetAssemblies())
-                   .SelectAllClasses()
-                   .InheritedFrom<IStartupTask>()
-                   .BindSingleInterface());
-
+            var kernel = new StandardKernel(new UXBackgroundWorkerModule());
             return kernel;
         }
 
         public override void Run()
         {
-            this.KeepRunning = true;
+            _cancellationTokenSource = new CancellationTokenSource();
+            _safeToExitHandle = new ManualResetEvent(false);
+            var token = _cancellationTokenSource.Token;
 
             // handle any startup tasks first
-            var startupTasks = this.Kernel.GetAll<IStartupTask>().ToList();
-            startupTasks.ForEach(s => s.Start());
+            foreach (var startupItem in this.Starters)
+            {
+                startupItem.Start();
+            }
 
             // now handle the actual workers
-            this.Processors = this.Kernel.GetAll<IWorker>().ToList();
             this.Tasks = new List<Task>();
 
-            foreach (var processor in this.Processors)
+            foreach (var worker in this.Workers)
             {
-                var t = Task.Factory.StartNew(processor.Start);
+                var t = Task.Factory.StartNew(worker.Start);
                 this.Tasks.Add(t);
             }
 
             // Control and restart a faulted job
-            while (this.KeepRunning)
+            while (!token.IsCancellationRequested)
             {
                 for (int i = 0; i < this.Tasks.Count; i++)
                 {
@@ -77,7 +68,7 @@ namespace UXBackgroundWorker
                     }
                 }
 
-                Thread.Sleep(TimeSpan.FromSeconds(this.TaskTimeout));
+                token.WaitHandle.WaitOne(this.TaskTimeout * 1000);
             }
         }
 
@@ -100,7 +91,8 @@ namespace UXBackgroundWorker
 
         protected override void OnRoleStopped()
         {
-            this.KeepRunning = false;
+            _cancellationTokenSource.Cancel();
+            _safeToExitHandle.WaitOne();
 
             foreach (var job in this.Processors)
             {
@@ -117,7 +109,7 @@ namespace UXBackgroundWorker
             catch (AggregateException ex)
             {
                 // Observe any unhandled exceptions.
-                this.ErrorLogging(String.Format("Finalizing exception thrown: {0} exceptions", ex.InnerExceptions.Count));
+                this.ErrorLogging(String.Format("Finalizing exception thrown: {0} exceptions", ex.InnerExceptions.Count), ex);
             }
 
             this.InfoLogging("Worker is stopped");
@@ -125,7 +117,7 @@ namespace UXBackgroundWorker
             base.OnRoleStopped();
         }
 
-        private void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e)
+        protected virtual void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e)
         {
             if (e.Changes.Any(change => change is RoleEnvironmentConfigurationSettingChange))
                 e.Cancel = true;

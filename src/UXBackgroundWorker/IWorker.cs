@@ -1,7 +1,7 @@
 ﻿
 namespace UXBackgroundWorker
 {
-    public interface IWorker
+    interface IWorker
     {
         void Start();
         void Stop();
