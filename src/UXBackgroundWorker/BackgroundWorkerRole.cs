@@ -70,6 +70,8 @@ namespace UXBackgroundWorker
 
                 token.WaitHandle.WaitOne(this.TaskTimeout * 1000);
             }
+
+            _safeToExitHandle.Set();
         }
 
         private void LogUnhandledException(Task task)

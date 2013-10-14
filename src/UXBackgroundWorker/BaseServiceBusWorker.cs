@@ -42,57 +42,52 @@ namespace UXBackgroundWorker
 
             var subClient = SubscriptionClient.CreateFromConnectionString(this.ConnectionString, this.TopicName, this.SubscriptionName);
 
-            subClient.Receive();
+            BrokeredMessage message = subClient.Receive();
 
-            while (this.KeepRunning)
+            if (message != null)
             {
-                BrokeredMessage message = subClient.Receive();
+                var messageBody = message.GetBody<string>();
+                message.Complete();
 
-                if (message != null)
+                // try to extract a count
+                var counts = messageBody.Split('#');
+                messageBody = counts[0];
+                int messageCount = 0;
+
+                if (counts.Length > 1)
+                    Int32.TryParse(counts[1], out messageCount);
+
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                DebugLogging(string.Format("{0} - Received new message", this.SubscriptionName), message.MessageId);
+
+                try
                 {
-                    var messageBody = message.GetBody<string>();
-                    message.Complete();
-
-                    // try to extract a count
-                    var counts = messageBody.Split('#');
-                    messageBody = counts[0];
-                    int messageCount = 0;
-
-                    if (counts.Length > 1)
-                        Int32.TryParse(counts[1], out messageCount);
-
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    DebugLogging(string.Format("{0} - Received new message", this.SubscriptionName), message.MessageId);
-
-                    try
-                    {
-                        Do(messageBody);
-                    }
-                    catch (Exception e)
-                    {
-                        stopWatch.Stop();
-                        this.ErrorLogging(string.Format("{0} - Failed to process message.", this.SubscriptionName), message.MessageId, e);
-
-                        if (messageCount < this.MessageRepostMaxCount)
-                        {
-                            messageCount++;
-
-                            var appendedMessageBody = String.Format("{0}#{1}", messageBody, messageCount);
-                            // this means that the message processing has failed and we need to repost the message
-                            var topicClient = TopicClient.CreateFromConnectionString(this.ConnectionString, this.TopicName);
-                            topicClient.Send(new BrokeredMessage(appendedMessageBody));
-
-                            this.ErrorLogging(string.Format("{0} - Reposting the message, retry #: {1}.", this.SubscriptionName, messageCount), message.MessageId, e);
-                        }
-                    }
-
-                    if (stopWatch.IsRunning)
-                        stopWatch.Stop();
-
-                    TimeSpan timeSpan = stopWatch.Elapsed;
-                    DebugLogging(string.Format("{0} - Processed message", this.SubscriptionName), message.MessageId, timeSpan.TotalSeconds);
+                    Do(messageBody);
                 }
+                catch (Exception e)
+                {
+                    stopWatch.Stop();
+                    this.ErrorLogging(string.Format("{0} - Failed to process message.", this.SubscriptionName), message.MessageId, e);
+
+                    if (messageCount < this.MessageRepostMaxCount)
+                    {
+                        messageCount++;
+
+                        var appendedMessageBody = String.Format("{0}#{1}", messageBody, messageCount);
+                        // this means that the message processing has failed and we need to repost the message
+                        var topicClient = TopicClient.CreateFromConnectionString(this.ConnectionString, this.TopicName);
+                        topicClient.Send(new BrokeredMessage(appendedMessageBody));
+
+                        this.ErrorLogging(string.Format("{0} - Reposting the message, retry #: {1}.", this.SubscriptionName, messageCount), message.MessageId, e);
+                    }
+                }
+
+                if (stopWatch.IsRunning)
+                    stopWatch.Stop();
+
+                TimeSpan timeSpan = stopWatch.Elapsed;
+                DebugLogging(string.Format("{0} - Processed message", this.SubscriptionName), message.MessageId, timeSpan.TotalSeconds);
             }
         }
     }

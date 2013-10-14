@@ -1,26 +1,32 @@
-﻿
+﻿using System.Threading;
+
 namespace UXBackgroundWorker
 {
     public abstract class BaseWorker : IWorker
     {
-        protected bool KeepRunning;
-
-        public BaseWorker() { }
+        private CancellationTokenSource _cancellationTokenSource;
+        private ManualResetEvent _safeToExitHandle;
 
         protected abstract void Process();
 
         public void Start()
         {
-            this.KeepRunning = true;
-            while (this.KeepRunning)
+            _cancellationTokenSource = new CancellationTokenSource();
+            _safeToExitHandle = new ManualResetEvent(false);
+            var token = _cancellationTokenSource.Token;
+
+            while (!token.IsCancellationRequested)
             {
                 this.Process();
+                token.WaitHandle.WaitOne(10000);
             }
+            _safeToExitHandle.Set();
         }
 
         public void Stop()
         {
-            this.KeepRunning = false;
+            _cancellationTokenSource.Cancel();
+            _safeToExitHandle.WaitOne();
         }
     }
 }
