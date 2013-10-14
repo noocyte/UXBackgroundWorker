@@ -15,7 +15,6 @@ namespace UXBackgroundWorker
         private CancellationTokenSource _cancellationTokenSource;
         private ManualResetEvent _safeToExitHandle;
 
-        private IEnumerable<IWorker> Processors { get; set; }
         private List<Task> Tasks { get; set; }
 
         protected virtual void ErrorLogging(string message, Exception ex = null) { }
@@ -63,7 +62,7 @@ namespace UXBackgroundWorker
                     if (task.IsFaulted)
                     {
                         LogUnhandledException(task);
-                        var jobToRestart = this.Processors.ElementAt(i);
+                        var jobToRestart = this.Workers.ElementAt(i);
                         this.Tasks[i] = Task.Factory.StartNew(jobToRestart.Start);
                     }
                 }
@@ -94,16 +93,13 @@ namespace UXBackgroundWorker
         protected override void OnRoleStopped()
         {
             _cancellationTokenSource.Cancel();
-            
-            if (this.Processors != null)
+
+            foreach (var job in this.Workers)
             {
-                foreach (var job in this.Processors)
-                {
-                    job.Stop();
-                    var disposable = job as IDisposable;
-                    if (disposable != null)
-                        disposable.Dispose();
-                }
+                job.Stop();
+                var disposable = job as IDisposable;
+                if (disposable != null)
+                    disposable.Dispose();
             }
 
             try
