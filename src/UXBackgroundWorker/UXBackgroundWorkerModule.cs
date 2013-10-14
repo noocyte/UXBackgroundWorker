@@ -1,6 +1,8 @@
 ﻿using Ninject.Extensions.Conventions;
 using Ninject.Modules;
 using System;
+using System.Linq;
+using System.Collections;
 
 namespace UXBackgroundWorker
 {
@@ -8,14 +10,18 @@ namespace UXBackgroundWorker
     {
         public override void Load()
         {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList()
+                .Where(a => !a.FullName.Contains("Anonymously Hosted DynamicMethods Assembly"));
+
+
             this.Bind(x => x
-                  .From(AppDomain.CurrentDomain.GetAssemblies())
+                  .From(assemblies)
                   .SelectAllClasses()
-                  .InheritedFrom<BaseWorker>()
+                  .InheritedFrom<IWorker>()
                   .BindSingleInterface());
 
             this.Bind(x => x
-                   .From(AppDomain.CurrentDomain.GetAssemblies())
+                   .From(assemblies)
                    .SelectAllClasses()
                    .InheritedFrom<IStartupTask>()
                    .BindSingleInterface());

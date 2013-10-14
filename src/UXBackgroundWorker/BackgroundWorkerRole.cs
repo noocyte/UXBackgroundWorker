@@ -24,7 +24,7 @@ namespace UXBackgroundWorker
         [Inject]
         public IEnumerable<IStartupTask> Starters { get; set; }
         [Inject]
-        public IEnumerable<BaseWorker> Workers { get; set; }
+        public IEnumerable<IWorker> Workers { get; set; }
 
         protected override IKernel CreateKernel()
         {

@@ -1,14 +1,27 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using System.Threading;
 using System.Threading.Tasks;
 using UXBackgroundWorker;
 
 namespace UXBackgroundWorkerTests
 {
-    [TestClass]
+    [TestFixture]
     public class BackgroundWorkerRoleTests
     {
-        [TestMethod]
+        [Test]
+        public void RunsWorker()
+        {
+            var testee = new TestableWorker();
+
+            testee.OnStart();
+            Task.Factory.StartNew(testee.Run);
+            Thread.Sleep(3000);
+            testee.OnStop();
+
+            Assert.IsTrue(SimpleWorker.HasBeenCalled);
+        }
+
+        [Test]
         public void RunsStartupTasks()
         {
             var testee = new TestableWorker();
@@ -49,8 +62,11 @@ namespace UXBackgroundWorkerTests
 
         public class SimpleWorker : BaseWorker
         {
+            public static bool HasBeenCalled { get; private set; }
+
             protected override void Process()
             {
+                HasBeenCalled = true;
             }
         }
 
