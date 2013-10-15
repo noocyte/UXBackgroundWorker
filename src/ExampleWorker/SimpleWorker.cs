@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using UXBackgroundWorker;
@@ -11,7 +12,8 @@ namespace ExampleWorker
     {
         protected override void Process()
         {
-            throw new NotImplementedException();
+            var client = new HttpClient();
+            client.GetAsync("http://blog.noocyte.net");
         }
     }
 }

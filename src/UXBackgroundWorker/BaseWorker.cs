@@ -18,7 +18,7 @@ namespace UXBackgroundWorker
             while (!token.IsCancellationRequested)
             {
                 this.Process();
-                token.WaitHandle.WaitOne(10000);
+                token.WaitHandle.WaitOne(1000);
             }
             _safeToExitHandle.Set();
         }
