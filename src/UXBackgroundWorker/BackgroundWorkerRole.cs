@@ -22,9 +22,9 @@ namespace UXBackgroundWorker
         protected virtual int TaskTimeout { get { return 30; } }
 
         [Inject]
-        public IEnumerable<IStartupTask> Starters { get; set; }
+        public List<IStartupTask> Starters { get; set; }
         [Inject]
-        public IEnumerable<IWorker> Workers { get; set; }
+        public List<IWorker> Workers { get; set; }
 
         protected override IKernel CreateKernel()
         {
