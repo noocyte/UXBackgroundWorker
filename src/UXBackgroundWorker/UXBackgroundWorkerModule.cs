@@ -10,9 +10,7 @@ namespace UXBackgroundWorker
     {
         public override void Load()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList()
-                .Where(a => !a.FullName.Contains("Anonymously Hosted DynamicMethods Assembly"));
-
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             this.Bind(x => x
                   .From(assemblies)

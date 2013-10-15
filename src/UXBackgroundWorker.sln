@@ -10,8 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{9D5A0C
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UXBackgroundWorkerTests", "UXBackgroundWorkerTests\UXBackgroundWorkerTests.csproj", "{612D0448-3D3A-488C-8E6F-A7BA22A55915}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,10 +20,6 @@ Global
 		{3AED4E09-5D75-4EE4-97FB-B400262D4367}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AED4E09-5D75-4EE4-97FB-B400262D4367}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AED4E09-5D75-4EE4-97FB-B400262D4367}.Release|Any CPU.Build.0 = Release|Any CPU
-		{612D0448-3D3A-488C-8E6F-A7BA22A55915}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{612D0448-3D3A-488C-8E6F-A7BA22A55915}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{612D0448-3D3A-488C-8E6F-A7BA22A55915}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{612D0448-3D3A-488C-8E6F-A7BA22A55915}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
