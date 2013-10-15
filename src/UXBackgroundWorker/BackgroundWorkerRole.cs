@@ -28,8 +28,7 @@ namespace UXBackgroundWorker
 
         protected override IKernel CreateKernel()
         {
-            var kernel = new StandardKernel(new UXBackgroundWorkerModule());
-            return kernel;
+            return new StandardKernel(new UXBackgroundWorkerModule());
         }
 
         public override void Run()
@@ -38,15 +37,12 @@ namespace UXBackgroundWorker
             _safeToExitHandle = new ManualResetEvent(false);
             var token = _cancellationTokenSource.Token;
 
-            // handle any startup tasks first
             foreach (var startupItem in this.Starters)
             {
                 startupItem.Start();
             }
 
-            // now handle the actual workers
             this.Tasks = new List<Task>();
-
             foreach (var worker in this.Workers)
             {
                 var t = Task.Factory.StartNew(worker.Start);
