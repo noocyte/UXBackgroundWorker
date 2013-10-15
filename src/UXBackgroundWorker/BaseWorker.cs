@@ -7,18 +7,20 @@ namespace UXBackgroundWorker
         private CancellationTokenSource _cancellationTokenSource;
         private ManualResetEvent _safeToExitHandle;
 
+        protected CancellationToken Token { get; set; }
+
         protected abstract void Process();
 
         public void Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _safeToExitHandle = new ManualResetEvent(false);
-            var token = _cancellationTokenSource.Token;
+            this.Token = _cancellationTokenSource.Token;
 
-            while (!token.IsCancellationRequested)
+            while (!this.Token.IsCancellationRequested)
             {
                 this.Process();
-                token.WaitHandle.WaitOne(1000);
+                this.Token.WaitHandle.WaitOne(1000);
             }
             _safeToExitHandle.Set();
         }

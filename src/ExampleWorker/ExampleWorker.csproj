@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleServicebusWorker.cs" />
     <Compile Include="SimpleWorker.cs" />
     <Compile Include="WorkerRole.cs" />
   </ItemGroup>

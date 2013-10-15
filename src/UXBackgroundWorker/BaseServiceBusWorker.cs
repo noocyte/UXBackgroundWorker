@@ -15,7 +15,7 @@ namespace UXBackgroundWorker
         protected virtual void InfoLogging(string message, string messageId = "") { }
         protected virtual void DebugLogging(string message, string messageId = "", double timerValue = 0.0) { }
 
-        protected virtual Func<BrokeredMessage> GetMessage { get; set; }
+        protected virtual Func<TimeSpan, BrokeredMessage> GetMessage { get; set; }
         protected virtual Action<BrokeredMessage> SendMessage { get; set; }
 
         protected int MessageRepostMaxCount { get; set; }
@@ -49,11 +49,19 @@ namespace UXBackgroundWorker
         {
             InfoLogging(string.Format("{0} - Processing", this.SubscriptionName));
 
-            BrokeredMessage message = this.GetMessage();
+            BrokeredMessage message = null;
+
+            while (message == null && !this.Token.IsCancellationRequested)
+            {
+                message = this.GetMessage(new TimeSpan(0, 0, 10));
+            }
 
             if (message != null)
             {
                 var messageBody = message.GetBody<string>();
+                if (String.IsNullOrEmpty(messageBody))
+                    messageBody = String.Empty;
+
                 message.Complete();
 
                 // try to extract a count
