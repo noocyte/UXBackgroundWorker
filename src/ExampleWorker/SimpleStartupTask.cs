@@ -3,9 +3,9 @@ using UXBackgroundWorker;
 
 namespace ExampleWorker
 {
-    public class SimpleWorker:BaseWorker
+    public class SimpleStartupTask : IStartupTask
     {
-        protected override void Process()
+        public void Start()
         {
             var client = new HttpClient();
             client.GetAsync("http://blog.noocyte.net");
