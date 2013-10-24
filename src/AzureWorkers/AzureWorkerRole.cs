@@ -40,6 +40,8 @@ namespace Proactima.AzureWorkers
         {
         }
 
+        protected abstract void OnRoleStarting();
+
         protected override IKernel CreateKernel()
         {
             var modules = new List<INinjectModule> {new AzureWorkerModule()};
@@ -107,6 +109,8 @@ namespace Proactima.AzureWorkers
         {
             ServicePointManager.DefaultConnectionLimit = 12;
             RoleEnvironment.Changing += RoleEnvironmentChanging;
+
+            OnRoleStarting();
 
             return base.OnRoleStarted();
         }
