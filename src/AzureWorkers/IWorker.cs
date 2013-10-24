@@ -5,5 +5,6 @@ namespace Proactima.AzureWorkers
     {
         void Start();
         void Stop();
+        int NumberOfInstances { get; }
     }
 }
