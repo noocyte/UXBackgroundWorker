@@ -8,7 +8,7 @@
     <licenseUrl>https://raw.github.com/proactima/AzureWorkers/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/proactima/AzureWorkers</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description></description>
+    <description>Basic framework for Azure Worker Role. Uses Ninject to allow for IoC in the Worker and relies on Ninject for getting potential workers and startup tasks. Uses the Task framework to run multiple tasks inside one worker.</description>
     <releaseNotes>Initial release of AzureWorkers</releaseNotes>
     <copyright>Copyright © Proactima Soluitions AS - 2013</copyright>
     <dependencies>
