@@ -29,7 +29,7 @@ namespace Proactima.AzureWorkers
             _safeToExitHandle.WaitOne();
         }
 
-        public virtual int NumberOfInstances { get; private set; }
+        public virtual int NumberOfInstances { get { return 1; } }
 
         protected abstract void Process();
     }

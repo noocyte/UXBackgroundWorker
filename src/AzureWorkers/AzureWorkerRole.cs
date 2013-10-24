@@ -60,10 +60,18 @@ namespace Proactima.AzureWorkers
             }
 
             Tasks = new List<Task>();
+            var taskWorkerMapping = new Dictionary<int, IWorker>();
+            var taskCounter = 0;
             foreach (var worker in Workers)
             {
-                var t = Task.Factory.StartNew(worker.Start, token);
-                Tasks.Add(t);
+                for (var i = 0; i < worker.NumberOfInstances; i++)
+                {
+                    var t = Task.Factory.StartNew(worker.Start, token);
+                    Tasks.Add(t);
+
+                    taskWorkerMapping.Add(taskCounter, worker);
+                    taskCounter++;
+                }
             }
 
             // Control and restart a faulted job
@@ -75,7 +83,8 @@ namespace Proactima.AzureWorkers
                     if (!task.IsFaulted) continue;
 
                     LogUnhandledException(task);
-                    var jobToRestart = Workers.ElementAt(i);
+
+                    var jobToRestart = taskWorkerMapping[i];
                     Tasks[i] = Task.Factory.StartNew(jobToRestart.Start, token);
                 }
 
