@@ -1,5 +1,5 @@
 ﻿using System.Net.Http;
-using UXBackgroundWorker;
+using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {

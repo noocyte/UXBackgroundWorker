@@ -1,16 +1,16 @@
-﻿using Microsoft.WindowsAzure.ServiceRuntime;
-using Ninject;
-using Ninject.Extensions.Azure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using Ninject;
+using Ninject.Extensions.Azure;
 
-namespace UXBackgroundWorker
+namespace Proactima.AzureWorkers
 {
-    public abstract class BackgroundWorkerRole : NinjectRoleEntryPoint
+    public abstract class AzureWorkerRole : NinjectRoleEntryPoint
     {
         private CancellationTokenSource _cancellationTokenSource;
         private ManualResetEvent _safeToExitHandle;
@@ -28,7 +28,7 @@ namespace UXBackgroundWorker
 
         protected override IKernel CreateKernel()
         {
-            return new StandardKernel(new UXBackgroundWorkerModule());
+            return new StandardKernel(new AzureWorkerModule());
         }
 
         public override void Run()
@@ -37,33 +37,33 @@ namespace UXBackgroundWorker
             _safeToExitHandle = new ManualResetEvent(false);
             var token = _cancellationTokenSource.Token;
 
-            foreach (var startupItem in this.Starters)
+            foreach (var startupItem in Starters)
             {
                 startupItem.Start();
             }
 
-            this.Tasks = new List<Task>();
-            foreach (var worker in this.Workers)
+            Tasks = new List<Task>();
+            foreach (var worker in Workers)
             {
                 var t = Task.Factory.StartNew(worker.Start);
-                this.Tasks.Add(t);
+                Tasks.Add(t);
             }
 
             // Control and restart a faulted job
             while (!token.IsCancellationRequested)
             {
-                for (int i = 0; i < this.Tasks.Count; i++)
+                for (int i = 0; i < Tasks.Count; i++)
                 {
-                    var task = this.Tasks[i];
+                    var task = Tasks[i];
                     if (task.IsFaulted)
                     {
                         LogUnhandledException(task);
-                        var jobToRestart = this.Workers.ElementAt(i);
-                        this.Tasks[i] = Task.Factory.StartNew(jobToRestart.Start);
+                        var jobToRestart = Workers.ElementAt(i);
+                        Tasks[i] = Task.Factory.StartNew(jobToRestart.Start);
                     }
                 }
 
-                token.WaitHandle.WaitOne(this.TaskTimeout * 1000);
+                token.WaitHandle.WaitOne(TaskTimeout * 1000);
             }
 
             _safeToExitHandle.Set();
@@ -73,15 +73,15 @@ namespace UXBackgroundWorker
         {
             // Observe unhandled exception
             if (task.Exception != null)
-                this.ErrorLogging("Job threw an exception", task.Exception.InnerException);
+                ErrorLogging("Job threw an exception", task.Exception.InnerException);
             else
-                this.ErrorLogging("Job failed with no exception");
+                ErrorLogging("Job failed with no exception");
         }
 
         protected override bool OnRoleStarted()
         {
             ServicePointManager.DefaultConnectionLimit = 12;
-            RoleEnvironment.Changing += this.RoleEnvironmentChanging;
+            RoleEnvironment.Changing += RoleEnvironmentChanging;
 
             return base.OnRoleStarted();
         }
@@ -90,9 +90,10 @@ namespace UXBackgroundWorker
         {
             _cancellationTokenSource.Cancel();
 
-            foreach (var job in this.Workers)
+            foreach (var job in Workers)
             {
                 job.Stop();
+                // ReSharper disable once SuspiciousTypeConversion.Global
                 var disposable = job as IDisposable;
                 if (disposable != null)
                     disposable.Dispose();
@@ -100,17 +101,17 @@ namespace UXBackgroundWorker
 
             try
             {
-                Task.WaitAll(this.Tasks.ToArray());
+                Task.WaitAll(Tasks.ToArray());
             }
             catch (AggregateException ex)
             {
                 // Observe any unhandled exceptions.
-                this.ErrorLogging(String.Format("Finalizing exception thrown: {0} exceptions", ex.InnerExceptions.Count), ex);
+                ErrorLogging(String.Format("Finalizing exception thrown: {0} exceptions", ex.InnerExceptions.Count), ex);
             }
 
             _safeToExitHandle.WaitOne();
 
-            this.InfoLogging("Worker is stopped");
+            InfoLogging("Worker is stopped");
 
             base.OnRoleStopped();
         }

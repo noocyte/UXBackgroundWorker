@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ServiceConfiguration serviceName="AzureExample" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2013-03.2.0">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="AzureExample" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2013-10.2.2">
   <Role name="ExampleWorker">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="TopicConnectionString" value="Endpoint=sb://verypublic-ns.servicebus.windows.net/;SharedSecretIssuer=owner;SharedSecretValue=upVMU3g4DjaqpTa/sayKsp5UIgh8JzhZmHQo8sMgmeY=" />
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="TopicConnectionString" value="[you connection string here please!]" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace UXBackgroundWorker
+namespace Proactima.AzureWorkers
 {
     public abstract class BaseWorker : IWorker
     {
@@ -9,18 +9,16 @@ namespace UXBackgroundWorker
 
         protected CancellationToken Token { get; set; }
 
-        protected abstract void Process();
-
         public void Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _safeToExitHandle = new ManualResetEvent(false);
-            this.Token = _cancellationTokenSource.Token;
+            Token = _cancellationTokenSource.Token;
 
-            while (!this.Token.IsCancellationRequested)
+            while (!Token.IsCancellationRequested)
             {
-                this.Process();
-                this.Token.WaitHandle.WaitOne(1000);
+                Process();
+                Token.WaitHandle.WaitOne(1000);
             }
             _safeToExitHandle.Set();
         }
@@ -30,5 +28,7 @@ namespace UXBackgroundWorker
             _cancellationTokenSource.Cancel();
             _safeToExitHandle.WaitOne();
         }
+
+        protected abstract void Process();
     }
 }

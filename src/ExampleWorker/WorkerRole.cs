@@ -1,8 +1,8 @@
-using UXBackgroundWorker;
+using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {
-    public class WorkerRole : BackgroundWorkerRole
+    public class WorkerRole : AzureWorkerRole
     {
     }
 }

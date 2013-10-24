@@ -1,5 +1,5 @@
 ﻿
-namespace UXBackgroundWorker
+namespace Proactima.AzureWorkers
 {
     public interface IStartupTask
     {

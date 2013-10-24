@@ -1,12 +1,10 @@
-﻿using Ninject.Extensions.Conventions;
+﻿using System;
+using Ninject.Extensions.Conventions;
 using Ninject.Modules;
-using System;
-using System.Linq;
-using System.Collections;
 
-namespace UXBackgroundWorker
+namespace Proactima.AzureWorkers
 {
-    internal class UXBackgroundWorkerModule : NinjectModule
+    internal class AzureWorkerModule : NinjectModule
     {
         public override void Load()
         {

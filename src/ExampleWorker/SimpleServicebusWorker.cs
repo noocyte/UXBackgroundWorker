@@ -1,6 +1,6 @@
-﻿using Microsoft.WindowsAzure;
-using System.Net.Http;
-using UXBackgroundWorker;
+﻿using System.Net.Http;
+using Microsoft.WindowsAzure;
+using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {
@@ -11,15 +11,15 @@ namespace ExampleWorker
             get { return CloudConfigurationManager.GetSetting("TopicConnectionString"); }
         }
 
+        protected override string TopicName
+        {
+            get { return "SimpleTopic"; }
+        }
+
         protected override void Do(string message)
         {
             var client = new HttpClient();
             client.GetAsync("http://blog.noocyte.net");
-        }
-
-        protected override string TopicName
-        {
-            get { return "SimpleTopic"; }
         }
     }
 }

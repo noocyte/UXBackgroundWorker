@@ -1,9 +1,9 @@
 ﻿using System.Net.Http;
-using UXBackgroundWorker;
+using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {
-    public class SimpleWorker:BaseWorker
+    public class SimpleWorker : BaseWorker
     {
         protected override void Process()
         {
