@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
+using Microsoft.WindowsAzure;
 
 namespace Proactima.AzureWorkers
 {
@@ -14,7 +15,18 @@ namespace Proactima.AzureWorkers
             MessageRepostMaxCount = 10;
         }
 
-        protected abstract string ConnectionString { get; }
+        /// <summary>
+        /// Will by default get the value from ServiceBusConnectionString.
+        /// Override to get it from somewhere else.
+        /// </summary>
+        protected virtual string ConnectionString
+        {
+            get
+            {
+                return CloudConfigurationManager.GetSetting("ServiceBusConnectionString");
+            }
+        }
+
         protected abstract string TopicName { get; }
 
         protected virtual Func<TimeSpan, BrokeredMessage> GetMessage { get; set; }
