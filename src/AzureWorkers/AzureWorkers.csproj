@@ -74,6 +74,7 @@
     <Compile Include="AzureWorkerModule.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AzureWorkers.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
