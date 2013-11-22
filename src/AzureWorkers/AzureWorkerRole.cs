@@ -25,7 +25,7 @@ namespace Proactima.AzureWorkers
         public List<IStartupTask> Starters { get; set; }
 
         [Inject]
-        public List<IWorker> Workers { get; set; }
+        public List<BaseWorker> Workers { get; set; }
 
         protected virtual void ErrorLogging(string message, Exception ex = null)
         {
@@ -54,7 +54,7 @@ namespace Proactima.AzureWorkers
             Run(Workers, Starters);
         }
 
-        public async void Run(IEnumerable<IWorker> workers, IEnumerable<IStartupTask> starters)
+        public async void Run(IEnumerable<BaseWorker> workers, IEnumerable<IStartupTask> starters)
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
@@ -64,7 +64,7 @@ namespace Proactima.AzureWorkers
             }
 
             Tasks = new List<Task>();
-            var enumerable = workers as IWorker[] ?? workers.ToArray();
+            var enumerable = workers as BaseWorker[] ?? workers.ToArray();
             foreach (var worker in enumerable)
             {
                 await worker.OnStart(_cancellationTokenSource.Token);

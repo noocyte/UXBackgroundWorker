@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Proactima.AzureWorkers
 {
-    public abstract class BaseWorker : IWorker
+    public abstract class BaseWorker
     {
         private CancellationTokenSource _cancellationTokenSource;
         protected CancellationToken Token { get; set; }
@@ -20,7 +20,7 @@ namespace Proactima.AzureWorkers
             return await Task.FromResult(true);
         }
 
-        public async Task ProtectedRun()
+        internal async Task ProtectedRun()
         {
             try
             {
@@ -44,7 +44,7 @@ namespace Proactima.AzureWorkers
             }
         }
 
-        public void OnStop()
+        public virtual void OnStop()
         {
             _cancellationTokenSource.Cancel();
         }

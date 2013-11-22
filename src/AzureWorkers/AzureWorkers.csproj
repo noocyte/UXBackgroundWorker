@@ -66,7 +66,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IStartupTask.cs" />
-    <Compile Include="IWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AzureWorkerRole.cs" />
     <Compile Include="BaseServiceBusWorker.cs" />

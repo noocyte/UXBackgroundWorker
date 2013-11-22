@@ -13,8 +13,8 @@ namespace Proactima.AzureWorkers
             this.Bind(x => x
                   .From(assemblies)
                   .SelectAllClasses()
-                  .InheritedFrom<IWorker>()
-                  .BindSingleInterface());
+                  .InheritedFrom<BaseWorker>()
+                  .BindAllBaseClasses());
 
             this.Bind(x => x
                    .From(assemblies)
