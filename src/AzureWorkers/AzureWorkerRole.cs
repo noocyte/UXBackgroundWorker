@@ -14,7 +14,6 @@ namespace Proactima.AzureWorkers
     public abstract class AzureWorkerRole : NinjectRoleEntryPoint
     {
         private CancellationTokenSource _cancellationTokenSource;
-        private ManualResetEvent _safeToExitHandle;
         private List<Task> Tasks { get; set; }
 
         protected virtual int TaskTimeout
@@ -52,57 +51,39 @@ namespace Proactima.AzureWorkers
 
         public override void Run()
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            _safeToExitHandle = new ManualResetEvent(false);
-            var token = _cancellationTokenSource.Token;
+            Run(Workers, Starters);
+        }
 
-            foreach (var startupItem in Starters)
+        public async void Run(IEnumerable<IWorker> workers, IEnumerable<IStartupTask> starters)
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            foreach (var startupItem in starters)
             {
                 startupItem.Start();
             }
 
             Tasks = new List<Task>();
-            var taskWorkerMapping = new Dictionary<int, IWorker>();
-            var taskCounter = 0;
-            foreach (var worker in Workers)
+            var enumerable = workers as IWorker[] ?? workers.ToArray();
+            foreach (var worker in enumerable)
             {
-                for (var i = 0; i < worker.NumberOfInstances; i++)
-                {
-                    var t = Task.Factory.StartNew(worker.Start, token);
-                    Tasks.Add(t);
-
-                    taskWorkerMapping.Add(taskCounter, worker);
-                    taskCounter++;
-                }
+                await worker.OnStart(_cancellationTokenSource.Token);
             }
 
-            // Control and restart a faulted job
-            while (!token.IsCancellationRequested)
+            foreach (var worker in enumerable)
             {
-                for (var i = 0; i < Tasks.Count; i++)
-                {
-                    var task = Tasks[i];
-                    if (!task.IsFaulted) continue;
-
-                    LogUnhandledException(task);
-
-                    var jobToRestart = taskWorkerMapping[i];
-                    Tasks[i] = Task.Factory.StartNew(jobToRestart.Start, token);
-                }
-
-                token.WaitHandle.WaitOne(TaskTimeout*1000);
+                Tasks.Add(worker.ProtectedRun());
             }
 
-            _safeToExitHandle.Set();
-        }
+            int completedTaskIndex;
+            while ((completedTaskIndex = Task.WaitAny(Tasks.ToArray())) != -1 && Tasks.Count > 0)
+            {
+                Tasks.RemoveAt(completedTaskIndex);
+                if (_cancellationTokenSource.Token.IsCancellationRequested) continue;
 
-        private void LogUnhandledException(Task task)
-        {
-            // Observe unhandled exception
-            if (task.Exception != null)
-                ErrorLogging("Job threw an exception", task.Exception.InnerException);
-            else
-                ErrorLogging("Job failed with no exception");
+                Tasks.Insert(completedTaskIndex, enumerable[completedTaskIndex].ProtectedRun());
+                await Task.Delay(1000);
+            }
         }
 
         protected override bool OnRoleStarted()
@@ -121,7 +102,7 @@ namespace Proactima.AzureWorkers
 
             foreach (var job in Workers)
             {
-                job.Stop();
+                job.OnStop();
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 var disposable = job as IDisposable;
                 if (disposable != null)
@@ -137,8 +118,6 @@ namespace Proactima.AzureWorkers
                 // Observe any unhandled exceptions.
                 ErrorLogging(String.Format("Finalizing exception thrown: {0} exceptions", ex.InnerExceptions.Count), ex);
             }
-
-            _safeToExitHandle.WaitOne();
 
             InfoLogging("Worker is stopped");
 

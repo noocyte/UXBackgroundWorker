@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.WindowsAzure;
 using Proactima.AzureWorkers;
 
@@ -16,10 +17,10 @@ namespace ExampleWorker
             get { return "SimpleTopic"; }
         }
 
-        protected override void Do(string message)
+        protected override async Task Do(string message)
         {
             var client = new HttpClient();
-            client.GetAsync("http://blog.noocyte.net");
+            await client.GetAsync("http://blog.noocyte.net");
         }
     }
 }

@@ -1,14 +1,15 @@
 ﻿using System.Net.Http;
+using System.Threading.Tasks;
 using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {
     public class SimpleWorker : BaseWorker
     {
-        protected override void Process()
+        public override async Task StartAsync()
         {
             var client = new HttpClient();
-            client.GetAsync("http://blog.noocyte.net");
+            await client.GetAsync("http://blog.noocyte.net");
         }
     }
 }
