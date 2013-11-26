@@ -7,3 +7,4 @@ Basic framework for Azure Worker Role. Uses Ninject to allow for IoC in the Work
 Howto use
 ------------
 See the included example in the source code.
+Also see [blog post](http://blog.noocyte.net/2013/11/22/azure-workers/) by Jarle for more information.
