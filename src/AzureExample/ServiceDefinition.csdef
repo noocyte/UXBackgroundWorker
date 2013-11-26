@@ -6,6 +6,7 @@
     </Imports>
     <ConfigurationSettings>
       <Setting name="TopicConnectionString" />
+      <Setting name="StorageConnectionString" />
     </ConfigurationSettings>
   </WorkerRole>
 </ServiceDefinition>
