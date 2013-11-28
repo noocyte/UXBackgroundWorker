@@ -37,16 +37,19 @@ namespace Proactima.AzureWorkers
 
         protected abstract Task Do(string message);
 
-        protected virtual void ErrorLogging(string message, string messageId = "", Exception ex = null)
+        protected virtual async Task ErrorLogging(string message, string messageId = "", Exception ex = null)
         {
+            await Task.FromResult(0);
         }
 
-        protected virtual void InfoLogging(string message, string messageId = "")
+        protected virtual async Task InfoLogging(string message, string messageId = "")
         {
+            await Task.FromResult(0);
         }
 
-        protected virtual void DebugLogging(string message, string messageId = "", double timerValue = 0.0)
+        protected virtual async Task DebugLogging(string message, string messageId = "", double timerValue = 0.0)
         {
+            await Task.FromResult(0);
         }
 
         protected virtual async Task Init()
@@ -69,7 +72,7 @@ namespace Proactima.AzureWorkers
 
         public override async Task StartAsync()
         {
-            InfoLogging(string.Format("{0} - Processing", SubscriptionName));
+            await InfoLogging(string.Format("{0} - Processing", SubscriptionName)).ConfigureAwait(false);
 
             await Init();
 
@@ -98,17 +101,36 @@ namespace Proactima.AzureWorkers
 
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                DebugLogging(string.Format("{0} - Received new message", SubscriptionName), message.MessageId);
+                await
+                    DebugLogging(string.Format("{0} - Received new message", SubscriptionName), message.MessageId)
+                        .ConfigureAwait(false);
                 var repostMessage = false;
-                try
-                {
-                    await Do(messageBody);
-                }
-                catch (Exception e)
+
+                Func<Task> action = async () => { await Do(messageBody).ConfigureAwait(false); };
+
+                await action.HandleExceptionWith(async (e) =>
                 {
                     stopWatch.Stop();
-                    repostMessage = HandleException(message, e, messageCount);
-                }
+
+                    await
+                        ErrorLogging(string.Format("{0} - Failed to process message.", SubscriptionName),
+                            message.MessageId,
+                            e).ConfigureAwait(false);
+
+                    if (messageCount < MessageRepostMaxCount)
+                    {
+                        await InfoLogging(
+                            string.Format("{0} - Reposting the message, retry #: {1}.", SubscriptionName, messageCount),
+                            message.MessageId).ConfigureAwait(false);
+                        repostMessage = true;
+                    }
+                    else
+                    {
+                        await InfoLogging(
+                            string.Format("{0} - Done trying to repost message, message has failed to be processed.",
+                                SubscriptionName)).ConfigureAwait(false);
+                    }
+                });
 
                 if (stopWatch.IsRunning)
                     stopWatch.Stop();
@@ -117,31 +139,9 @@ namespace Proactima.AzureWorkers
                     await RepostMessage(messageCount, messageBody);
 
                 var timeSpan = stopWatch.Elapsed;
-                DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
-                    timeSpan.TotalSeconds);
+                await DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
+                    timeSpan.TotalSeconds).ConfigureAwait(false);
             }
-        }
-
-        private bool HandleException(BrokeredMessage message, Exception e, int messageCount)
-        {
-            var repostMessage = false;
-            ErrorLogging(string.Format("{0} - Failed to process message.", SubscriptionName), message.MessageId,
-                e);
-
-            if (messageCount < MessageRepostMaxCount)
-            {
-                ErrorLogging(
-                    string.Format("{0} - Reposting the message, retry #: {1}.", SubscriptionName, messageCount),
-                    message.MessageId, e);
-                repostMessage = true;
-            }
-            else
-            {
-                ErrorLogging(
-                    string.Format("{0} - Done trying to repost message, message has failed to be processed.",
-                        SubscriptionName));
-            }
-            return repostMessage;
         }
 
         private async Task RepostMessage(int messageCount, string messageBody)
@@ -149,7 +149,6 @@ namespace Proactima.AzureWorkers
             messageCount++;
 
             var appendedMessageBody = String.Format("{0}#{1}", messageBody, messageCount);
-            // this means that the message processing has failed and we need to repost the message
             await SendMessage(new BrokeredMessage(appendedMessageBody));
         }
     }

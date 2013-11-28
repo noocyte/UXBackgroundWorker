@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
@@ -32,16 +31,19 @@ namespace Proactima.AzureWorkers
 
         protected abstract Task Do(IEnumerable<CloudQueueMessage> messages);
 
-        protected virtual void ErrorLogging(string message, Exception ex = null)
+        protected virtual async Task ErrorLogging(string message, Exception ex = null)
         {
+            await Task.FromResult(0);
         }
 
-        protected virtual void InfoLogging(string message)
+        protected virtual async Task InfoLogging(string message)
         {
+            await Task.FromResult(0);
         }
 
-        protected virtual void DebugLogging(string message, double timerValue = 0.0)
+        protected virtual async Task DebugLogging(string message, double timerValue = 0.0)
         {
+            await Task.FromResult(0);
         }
 
         protected virtual async Task Init()
@@ -54,44 +56,40 @@ namespace Proactima.AzureWorkers
 
         public override async Task StartAsync()
         {
-            InfoLogging(string.Format("{0} - Processing", SubscriptionName));
-           
+            await InfoLogging(string.Format("{0} - Processing", SubscriptionName)).ConfigureAwait(false);
+
             if (_queue == null)
                 await Init();
 
-            await _queue.FetchAttributesAsync();
+            await _queue.FetchAttributesAsync().ConfigureAwait(false);
 
             if (_queue.ApproximateMessageCount > 0 && !Token.IsCancellationRequested)
             {
-                var messages = await _queue.GetMessagesAsync(MessageCount, TimeSpan.FromSeconds(30), null, null, Token);
+                var messages =
+                    await
+                        _queue.GetMessagesAsync(MessageCount, TimeSpan.FromSeconds(30), null, null, Token)
+                            .ConfigureAwait(false);
 
                 if (messages.Any())
                 {
-                    try
-                    {
-                        await Do(messages);
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorLogging("Processing of messages failed", ex);
-                    }
+                    Func<Task> func = async () => { await Do(messages).ConfigureAwait(false); };
+
+                    await func.LogWith(ErrorLogging, "Processing of messages failed").ConfigureAwait(false);
                 }
             }
         }
 
         protected async Task DeleteMessages(IEnumerable<CloudQueueMessage> messages)
         {
-            try
+            Func<Task> func = async () =>
             {
                 foreach (var msg in messages)
                 {
-                    await _queue.DeleteMessageAsync(msg, Token);
+                    await _queue.DeleteMessageAsync(msg, Token).ConfigureAwait(false);
                 }
-            }
-            catch (Exception ex)
-            {
-                ErrorLogging("Deleting messages failed", ex);
-            }
+            };
+
+            await func.LogWith(ErrorLogging, "Deleting messages failed").ConfigureAwait(false);
         }
     }
 }
