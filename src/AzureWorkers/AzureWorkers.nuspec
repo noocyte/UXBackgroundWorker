@@ -2,8 +2,8 @@
 <package >
   <metadata>
     <id>AzureWorkers</id>
-    <version>1.2.0-prerelease</version>
-    <authors>Jarle Nygård, Anders Østhus</authors>
+    <version>1.2.1-prerelease</version>
+    <authors>Jarle Nygård, Anders Østhus, Alessandro Di Gioia</authors>
     <owners>Proactima Solutions AS</owners>
     <licenseUrl>https://raw.github.com/proactima/AzureWorkers/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/proactima/AzureWorkers</projectUrl>
