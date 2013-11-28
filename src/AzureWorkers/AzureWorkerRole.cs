@@ -27,12 +27,14 @@ namespace Proactima.AzureWorkers
         [Inject]
         public List<BaseWorker> Workers { get; set; }
 
-        protected virtual void ErrorLogging(string message, Exception ex = null)
+        protected virtual async Task ErrorLogging(string message, Exception ex = null)
         {
+            await Task.FromResult(0);
         }
 
-        protected virtual void InfoLogging(string message)
+        protected virtual async Task InfoLogging(string message)
         {
+            await Task.FromResult(0);
         }
 
         protected virtual void AddCustomModules(IList<INinjectModule> moduleList)
@@ -113,13 +115,9 @@ namespace Proactima.AzureWorkers
             {
                 Task.WaitAll(Tasks.ToArray());
             }
-            catch (AggregateException ex)
+            catch (AggregateException)
             {
-                // Observe any unhandled exceptions.
-                ErrorLogging(String.Format("Finalizing exception thrown: {0} exceptions", ex.InnerExceptions.Count), ex);
             }
-
-            InfoLogging("Worker is stopped");
 
             base.OnRoleStopped();
         }

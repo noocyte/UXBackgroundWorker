@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncExceptionHandler.cs" />
     <Compile Include="BaseQueueWorker.cs" />
     <Compile Include="IStartupTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
