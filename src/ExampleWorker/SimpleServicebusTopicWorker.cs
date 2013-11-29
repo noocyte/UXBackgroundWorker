@@ -5,7 +5,7 @@ using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {
-    public class SimpleServicebusWorker : BaseServiceBusWorker
+    public class SimpleServicebusTopicWorker : BaseServiceBusTopicWorker
     {
         protected override string ConnectionString
         {

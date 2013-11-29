@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Proactima.AzureWorkers
 {
-    public class BaseServiceBusQueueWorker : BaseWorker
+    public class BaseServiceBusQueueWorker : BaseServiceBusWorker
     {
     }
 }
