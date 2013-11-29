@@ -9,7 +9,7 @@ namespace ExampleWorker
     {
         protected override string ConnectionString
         {
-            get { return CloudConfigurationManager.GetSetting("TopicConnectionString"); }
+            get { return CloudConfigurationManager.GetSetting("ServiceBusConnectionString"); }
         }
 
         protected override string TopicName

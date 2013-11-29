@@ -5,7 +5,7 @@
       <Import moduleName="Diagnostics" />
     </Imports>
     <ConfigurationSettings>
-      <Setting name="TopicConnectionString" />
+      <Setting name="ServiceBusConnectionString" />
       <Setting name="StorageConnectionString" />
     </ConfigurationSettings>
   </WorkerRole>

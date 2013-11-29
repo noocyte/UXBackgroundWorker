@@ -49,6 +49,10 @@ namespace Proactima.AzureWorkers
             _cancellationTokenSource.Cancel();
         }
 
+        protected virtual async Task ErrorLogging(string message, Exception ex = null)
+        {
+            await Task.FromResult(0);
+        }
         protected virtual async Task ErrorLogging(string message, string messageId = "", Exception ex = null)
         {
             await Task.FromResult(0);

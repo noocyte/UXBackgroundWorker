@@ -31,11 +31,6 @@ namespace Proactima.AzureWorkers
 
         protected abstract Task Do(IEnumerable<CloudQueueMessage> messages);
 
-        protected virtual async Task ErrorLogging(string message, Exception ex = null)
-        {
-            await Task.FromResult(0);
-        }
-
         protected virtual async Task Init()
         {
             var storageAccount = CloudStorageAccount.Parse(ConnectionString);
