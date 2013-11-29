@@ -37,21 +37,6 @@ namespace Proactima.AzureWorkers
 
         protected abstract Task Do(string message);
 
-        protected virtual async Task ErrorLogging(string message, string messageId = "", Exception ex = null)
-        {
-            await Task.FromResult(0);
-        }
-
-        protected virtual async Task InfoLogging(string message, string messageId = "")
-        {
-            await Task.FromResult(0);
-        }
-
-        protected virtual async Task DebugLogging(string message, string messageId = "", double timerValue = 0.0)
-        {
-            await Task.FromResult(0);
-        }
-
         protected virtual async Task Init()
         {
             var namespaceManager = NamespaceManager.CreateFromConnectionString(ConnectionString);
@@ -74,7 +59,8 @@ namespace Proactima.AzureWorkers
         {
             await InfoLogging(string.Format("{0} - Processing", SubscriptionName)).ConfigureAwait(false);
 
-            await Init();
+            if (GetMessage == null || SendMessage == null)
+                await Init();
 
             BrokeredMessage message = null;
 

@@ -36,16 +36,6 @@ namespace Proactima.AzureWorkers
             await Task.FromResult(0);
         }
 
-        protected virtual async Task InfoLogging(string message)
-        {
-            await Task.FromResult(0);
-        }
-
-        protected virtual async Task DebugLogging(string message, double timerValue = 0.0)
-        {
-            await Task.FromResult(0);
-        }
-
         protected virtual async Task Init()
         {
             var storageAccount = CloudStorageAccount.Parse(ConnectionString);

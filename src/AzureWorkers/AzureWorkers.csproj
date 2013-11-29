@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="AsyncExceptionHandler.cs" />
     <Compile Include="BaseQueueWorker.cs" />
+    <Compile Include="BaseServiceBusQueueWorker.cs" />
     <Compile Include="IStartupTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AzureWorkerRole.cs" />
