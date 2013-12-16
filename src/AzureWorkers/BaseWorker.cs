@@ -11,13 +11,13 @@ namespace Proactima.AzureWorkers
 
         public virtual async Task StartAsync()
         {
-            await Task.FromResult(0);
+            await Task.FromResult(0).ConfigureAwait(false);
         }
 
         public virtual async Task<bool> OnStart(CancellationToken cancellationToken)
         {
             Token = cancellationToken;
-            return await Task.FromResult(true);
+            return await Task.FromResult(true).ConfigureAwait(false);
         }
 
         internal async Task ProtectedRun()
@@ -29,7 +29,7 @@ namespace Proactima.AzureWorkers
 
                 while (!Token.IsCancellationRequested)
                 {
-                    await StartAsync();
+                    await StartAsync().ConfigureAwait(false);
                     Token.WaitHandle.WaitOne(1000);
                 }
             }
@@ -51,21 +51,21 @@ namespace Proactima.AzureWorkers
 
         protected virtual async Task ErrorLogging(string message, Exception ex = null)
         {
-            await Task.FromResult(0);
+            await Task.FromResult(0).ConfigureAwait(false);
         }
         protected virtual async Task ErrorLogging(string message, string messageId = "", Exception ex = null)
         {
-            await Task.FromResult(0);
+            await Task.FromResult(0).ConfigureAwait(false);
         }
 
         protected virtual async Task InfoLogging(string message, string messageId = "")
         {
-            await Task.FromResult(0);
+            await Task.FromResult(0).ConfigureAwait(false);
         }
 
         protected virtual async Task DebugLogging(string message, string messageId = "", double timerValue = 0.0)
         {
-            await Task.FromResult(0);
+            await Task.FromResult(0).ConfigureAwait(false);
         }
     }
 }

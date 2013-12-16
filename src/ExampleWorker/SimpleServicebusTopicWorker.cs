@@ -20,7 +20,7 @@ namespace ExampleWorker
         protected override async Task Do(string message)
         {
             var client = new HttpClient();
-            await client.GetAsync("http://blog.noocyte.net");
+            await client.GetAsync("http://blog.noocyte.net").ConfigureAwait(false);
         }
     }
 }

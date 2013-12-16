@@ -36,7 +36,7 @@ namespace Proactima.AzureWorkers
             var storageAccount = CloudStorageAccount.Parse(ConnectionString);
             var queueClient = storageAccount.CreateCloudQueueClient();
             _queue = queueClient.GetQueueReference(QueueName);
-            await _queue.CreateIfNotExistsAsync();
+            await _queue.CreateIfNotExistsAsync().ConfigureAwait(false);
         }
 
         public override async Task StartAsync()
@@ -44,7 +44,7 @@ namespace Proactima.AzureWorkers
             await InfoLogging(string.Format("{0} - Processing", SubscriptionName)).ConfigureAwait(false);
 
             if (_queue == null)
-                await Init();
+                await Init().ConfigureAwait(false);
 
             await _queue.FetchAttributesAsync().ConfigureAwait(false);
 

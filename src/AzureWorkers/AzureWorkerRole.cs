@@ -29,12 +29,12 @@ namespace Proactima.AzureWorkers
 
         protected virtual async Task ErrorLogging(string message, Exception ex = null)
         {
-            await Task.FromResult(0);
+            await Task.FromResult(0).ConfigureAwait(false);
         }
 
         protected virtual async Task InfoLogging(string message)
         {
-            await Task.FromResult(0);
+            await Task.FromResult(0).ConfigureAwait(false);
         }
 
         protected virtual void AddCustomModules(IList<INinjectModule> moduleList)
@@ -69,7 +69,7 @@ namespace Proactima.AzureWorkers
             var enumerable = workers as BaseWorker[] ?? workers.ToArray();
             foreach (var worker in enumerable)
             {
-                await worker.OnStart(_cancellationTokenSource.Token);
+                await worker.OnStart(_cancellationTokenSource.Token).ConfigureAwait(false);
             }
 
             foreach (var worker in enumerable)
@@ -84,7 +84,7 @@ namespace Proactima.AzureWorkers
                 if (_cancellationTokenSource.Token.IsCancellationRequested) continue;
 
                 Tasks.Insert(completedTaskIndex, enumerable[completedTaskIndex].ProtectedRun());
-                await Task.Delay(1000);
+                await Task.Delay(1000).ConfigureAwait(false);
             }
         }
 

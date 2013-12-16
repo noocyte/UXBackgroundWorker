@@ -33,8 +33,8 @@ namespace Proactima.AzureWorkers
         {
             var namespaceManager = NamespaceManager.CreateFromConnectionString(ConnectionString);
 
-            if (!await namespaceManager.QueueExistsAsync(QueueName))
-                await namespaceManager.CreateQueueAsync(QueueName);
+            if (!await namespaceManager.QueueExistsAsync(QueueName).ConfigureAwait(false))
+                await namespaceManager.CreateQueueAsync(QueueName).ConfigureAwait(false);
 
             _queueClient = QueueClient.CreateFromConnectionString(ConnectionString, QueueName);
         }
@@ -44,7 +44,7 @@ namespace Proactima.AzureWorkers
             await InfoLogging(string.Format("{0} - Processing", ImplementationName)).ConfigureAwait(false);
 
             if (_queueClient == null)
-                await Init();
+                await Init().ConfigureAwait(false);
 
             if (_queueClient != null)
             {

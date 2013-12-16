@@ -14,7 +14,7 @@ namespace ExampleWorker
 
         protected override async Task Do(IEnumerable<BrokeredMessage> messages)
         {
-            await DeleteMessages(messages);
+            await DeleteMessages(messages).ConfigureAwait(false);
         }
     }
 }

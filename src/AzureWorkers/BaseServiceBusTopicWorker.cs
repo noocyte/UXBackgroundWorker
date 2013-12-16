@@ -31,11 +31,11 @@ namespace Proactima.AzureWorkers
         {
             var namespaceManager = NamespaceManager.CreateFromConnectionString(ConnectionString);
 
-            if (!await namespaceManager.TopicExistsAsync(TopicName))
-                await namespaceManager.CreateTopicAsync(TopicName);
+            if (!await namespaceManager.TopicExistsAsync(TopicName).ConfigureAwait(false))
+                await namespaceManager.CreateTopicAsync(TopicName).ConfigureAwait(false);
 
-            if (!await namespaceManager.SubscriptionExistsAsync(TopicName, SubscriptionName))
-                await namespaceManager.CreateSubscriptionAsync(TopicName, SubscriptionName);
+            if (!await namespaceManager.SubscriptionExistsAsync(TopicName, SubscriptionName).ConfigureAwait(false))
+                await namespaceManager.CreateSubscriptionAsync(TopicName, SubscriptionName).ConfigureAwait(false);
 
             // setup delegates to abstract away Service Bus stuff
             var subClient = SubscriptionClient.CreateFromConnectionString(ConnectionString, TopicName, SubscriptionName);
@@ -50,13 +50,13 @@ namespace Proactima.AzureWorkers
             await InfoLogging(string.Format("{0} - Processing", SubscriptionName)).ConfigureAwait(false);
 
             if (GetMessage == null || SendMessage == null)
-                await Init();
+                await Init().ConfigureAwait(false);
 
             BrokeredMessage message = null;
 
             while (message == null && !Token.IsCancellationRequested)
             {
-                message = await GetMessage(new TimeSpan(0, 0, 10));
+                message = await GetMessage(new TimeSpan(0, 0, 10)).ConfigureAwait(false);
             }
 
             if (message != null)
@@ -106,13 +106,13 @@ namespace Proactima.AzureWorkers
                             string.Format("{0} - Done trying to repost message, message has failed to be processed.",
                                 SubscriptionName)).ConfigureAwait(false);
                     }
-                });
+                }).ConfigureAwait(false);
 
                 if (stopWatch.IsRunning)
                     stopWatch.Stop();
 
                 if (repostMessage)
-                    await RepostMessage(messageCount, messageBody);
+                    await RepostMessage(messageCount, messageBody).ConfigureAwait(false);
 
                 var timeSpan = stopWatch.Elapsed;
                 await DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
@@ -125,7 +125,7 @@ namespace Proactima.AzureWorkers
             messageCount++;
 
             var appendedMessageBody = String.Format("{0}#{1}", messageBody, messageCount);
-            await SendMessage(new BrokeredMessage(appendedMessageBody));
+            await SendMessage(new BrokeredMessage(appendedMessageBody)).ConfigureAwait(false);
         }
     }
 }

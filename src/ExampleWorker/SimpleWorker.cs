@@ -9,7 +9,7 @@ namespace ExampleWorker
         public override async Task StartAsync()
         {
             var client = new HttpClient();
-            await client.GetAsync("http://blog.noocyte.net");
+            await client.GetAsync("http://blog.noocyte.net").ConfigureAwait(false);
         }
     }
 }
