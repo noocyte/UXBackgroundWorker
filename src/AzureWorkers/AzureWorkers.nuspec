@@ -2,21 +2,21 @@
 <package >
   <metadata>
     <id>AzureWorkers</id>
-    <version>1.2.2-prerelease</version>
+    <version>2.0.0-prerelease</version>
     <authors>Jarle Nygård, Anders Østhus, Alessandro Di Gioia</authors>
     <owners>Proactima Solutions AS</owners>
     <licenseUrl>https://raw.github.com/proactima/AzureWorkers/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/proactima/AzureWorkers</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Basic framework for Azure Worker Role. Uses Ninject to allow for IoC in the Worker and relies on Ninject for getting potential workers and startup tasks. Uses the Task framework to run multiple tasks inside one worker.</description>
-    <releaseNotes>Initial release of AzureWorkers</releaseNotes>
-    <copyright>Copyright © Proactima Soluitions AS - 2013</copyright>
+    <releaseNotes>Minor breaking changes, bumped version to 2.0 to signal this.</releaseNotes>
+    <copyright>Copyright © Proactima Solutions AS - 2013</copyright>
     <dependencies>
       <dependency id="Ninject" version="3.0.2-unstable-9038" />
       <dependency id="Ninject.Extensions.Azure" version="3.0.2-unstable-9009" />
       <dependency id="Ninject.Extensions.Conventions" version="3.0.2-unstable-9010" />
-      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="2.0.1.0" />
-      <dependency id="WindowsAzure.ServiceBus" version="2.2.1.0" />
+      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="2.0.2.0" />
+      <dependency id="WindowsAzure.ServiceBus" version="2.2.1.1" />
     </dependencies>
   </metadata>
 </package>
