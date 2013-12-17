@@ -13,5 +13,10 @@ namespace Proactima.AzureWorkers
         {
             get { return CloudConfigurationManager.GetSetting("ServiceBusConnectionString"); }
         }
+
+        protected override int LoopWaitTime
+        {
+            get { return 0; }
+        }
     }
 }

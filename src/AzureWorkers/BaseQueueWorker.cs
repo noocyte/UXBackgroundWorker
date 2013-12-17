@@ -16,6 +16,10 @@ namespace Proactima.AzureWorkers
         {
             get { return 32; }
         }
+        protected override int LoopWaitTime
+        {
+            get { return 0; }
+        }
 
         protected virtual string ConnectionString
         {

@@ -30,16 +30,17 @@ namespace Proactima.AzureWorkers
                 while (!Token.IsCancellationRequested)
                 {
                     await StartAsync().ConfigureAwait(false);
-                    Token.WaitHandle.WaitOne(1000);
+                    if (LoopWaitTime > 0)
+                        Token.WaitHandle.WaitOne(LoopWaitTime);
                 }
             }
             catch (SystemException)
             {
                 throw;
             }
-// ReSharper disable EmptyGeneralCatchClause
+            // ReSharper disable EmptyGeneralCatchClause
             catch (Exception)
-// ReSharper restore EmptyGeneralCatchClause
+            // ReSharper restore EmptyGeneralCatchClause
             {
             }
         }
@@ -67,5 +68,7 @@ namespace Proactima.AzureWorkers
         {
             await Task.FromResult(0).ConfigureAwait(false);
         }
+
+        protected virtual int LoopWaitTime { get { return 1000; } }
     }
 }
