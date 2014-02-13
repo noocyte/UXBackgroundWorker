@@ -22,7 +22,7 @@ namespace Proactima.AzureWorkers
 
         internal async Task ProtectedRun()
         {
-            try
+            Func<Task> loop = async () =>
             {
                 _cancellationTokenSource = new CancellationTokenSource();
                 Token = _cancellationTokenSource.Token;
@@ -33,16 +33,9 @@ namespace Proactima.AzureWorkers
                     if (LoopWaitTime > 0)
                         Token.WaitHandle.WaitOne(LoopWaitTime);
                 }
-            }
-            catch (SystemException)
-            {
-                throw;
-            }
-            // ReSharper disable EmptyGeneralCatchClause
-            catch (Exception)
-            // ReSharper restore EmptyGeneralCatchClause
-            {
-            }
+            };
+
+            await loop.LogWith(ErrorLogging,"An exception was caught in BaseWorker.ProtectedRun");
         }
 
         public virtual void OnStop()
