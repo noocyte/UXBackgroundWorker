@@ -41,7 +41,7 @@ namespace Proactima.AzureWorkers
 
         public override async Task StartAsync()
         {
-            await InfoLogging(string.Format("{0} - Processing", ImplementationName)).ConfigureAwait(false);
+            InfoLogging(string.Format("{0} - Processing", ImplementationName));
 
             if (_queueClient == null)
                 await Init().ConfigureAwait(false);
@@ -60,13 +60,16 @@ namespace Proactima.AzureWorkers
 
         protected async Task DeleteMessages(IEnumerable<BrokeredMessage> messages)
         {
-            Func<Task> func = async () =>
+            try
             {
                 await _queueClient
                     .CompleteBatchAsync(messages.Select(m => m.LockToken)).ConfigureAwait(false);
-            };
-
-            await func.LogWith(ErrorLogging, "Deleting messages failed").ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                ErrorLogging("Deleting messages failed", exception);
+                throw;
+            }
         }
     }
 }

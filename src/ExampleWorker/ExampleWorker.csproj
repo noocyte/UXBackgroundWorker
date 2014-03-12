@@ -104,6 +104,7 @@
     <Compile Include="SimpleServiceBusQueueWorker.cs" />
     <Compile Include="SimpleServicebusTopicWorker.cs" />
     <Compile Include="SimpleStartupTask.cs" />
+    <Compile Include="DisabledWorker.cs" />
     <Compile Include="SimpleWorker.cs" />
     <Compile Include="WorkerRole.cs" />
   </ItemGroup>

@@ -66,13 +66,14 @@ namespace Proactima.AzureWorkers
             }
 
             Tasks = new List<Task>();
-            var enumerable = workers as BaseWorker[] ?? workers.ToArray();
-            foreach (var worker in enumerable)
+            var enabledWorkers = workers.Where(w => w.Enabled).ToList();
+
+            foreach (var worker in enabledWorkers)
             {
                 await worker.OnStart(_cancellationTokenSource.Token).ConfigureAwait(false);
             }
 
-            foreach (var worker in enumerable)
+            foreach (var worker in enabledWorkers)
             {
                 Tasks.Add(worker.ProtectedRun());
             }
@@ -83,7 +84,7 @@ namespace Proactima.AzureWorkers
                 Tasks.RemoveAt(completedTaskIndex);
                 if (_cancellationTokenSource.Token.IsCancellationRequested) continue;
 
-                Tasks.Insert(completedTaskIndex, enumerable[completedTaskIndex].ProtectedRun());
+                Tasks.Insert(completedTaskIndex, enabledWorkers[completedTaskIndex].ProtectedRun());
                 await Task.Delay(1000).ConfigureAwait(false);
             }
         }

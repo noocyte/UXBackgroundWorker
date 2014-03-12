@@ -9,6 +9,8 @@ namespace Proactima.AzureWorkers
         private CancellationTokenSource _cancellationTokenSource;
         protected CancellationToken Token { get; set; }
 
+        public virtual bool Enabled { get { return true; } }
+
         public virtual async Task StartAsync()
         {
             await Task.FromResult(0).ConfigureAwait(false);
@@ -22,7 +24,7 @@ namespace Proactima.AzureWorkers
 
         internal async Task ProtectedRun()
         {
-            Func<Task> loop = async () =>
+            try
             {
                 _cancellationTokenSource = new CancellationTokenSource();
                 Token = _cancellationTokenSource.Token;
@@ -33,9 +35,11 @@ namespace Proactima.AzureWorkers
                     if (LoopWaitTime > 0)
                         Token.WaitHandle.WaitOne(LoopWaitTime);
                 }
-            };
-
-            await loop.LogWith(ErrorLogging,"An exception was caught in BaseWorker.ProtectedRun");
+            }
+            catch (Exception exception)
+            {
+                ErrorLogging("An exception was caught in BaseWorker.ProtectedRun", exception);
+            }
         }
 
         public virtual void OnStop()
@@ -43,23 +47,19 @@ namespace Proactima.AzureWorkers
             _cancellationTokenSource.Cancel();
         }
 
-        protected virtual async Task ErrorLogging(string message, Exception ex = null)
+        protected virtual void ErrorLogging(string message, Exception ex = null)
         {
-            await Task.FromResult(0).ConfigureAwait(false);
         }
-        protected virtual async Task ErrorLogging(string message, string messageId = "", Exception ex = null)
+        protected virtual void ErrorLogging(string message, string messageId = "", Exception ex = null)
         {
-            await Task.FromResult(0).ConfigureAwait(false);
         }
 
-        protected virtual async Task InfoLogging(string message, string messageId = "")
+        protected virtual void InfoLogging(string message, string messageId = "")
         {
-            await Task.FromResult(0).ConfigureAwait(false);
         }
 
-        protected virtual async Task DebugLogging(string message, string messageId = "", double timerValue = 0.0)
+        protected virtual void DebugLogging(string message, string messageId = "", double timerValue = 0.0)
         {
-            await Task.FromResult(0).ConfigureAwait(false);
         }
 
         protected virtual int LoopWaitTime { get { return 1000; } }

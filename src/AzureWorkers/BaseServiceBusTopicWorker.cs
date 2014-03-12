@@ -1,8 +1,8 @@
-﻿using Microsoft.ServiceBus;
-using Microsoft.ServiceBus.Messaging;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.ServiceBus;
+using Microsoft.ServiceBus.Messaging;
 
 namespace Proactima.AzureWorkers
 {
@@ -47,7 +47,7 @@ namespace Proactima.AzureWorkers
 
         public override async Task StartAsync()
         {
-            await InfoLogging(string.Format("{0} - Processing", SubscriptionName)).ConfigureAwait(false);
+            InfoLogging(string.Format("{0} - Processing", SubscriptionName));
 
             if (GetMessage == null || SendMessage == null)
                 await Init().ConfigureAwait(false);
@@ -56,6 +56,7 @@ namespace Proactima.AzureWorkers
 
             while (message == null && !Token.IsCancellationRequested)
             {
+// ReSharper disable once PossibleNullReferenceException
                 message = await GetMessage(new TimeSpan(0, 0, 10)).ConfigureAwait(false);
             }
 
@@ -77,46 +78,44 @@ namespace Proactima.AzureWorkers
 
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                await
-                    DebugLogging(string.Format("{0} - Received new message", SubscriptionName), message.MessageId)
-                        .ConfigureAwait(false);
+                DebugLogging(string.Format("{0} - Received new message", SubscriptionName), message.MessageId);
                 var repostMessage = false;
 
-                Func<Task> action = async () => { await Do(messageBody).ConfigureAwait(false); };
-
-                await action.HandleExceptionWith(async (e) =>
+                try
+                {
+                    await Do(messageBody).ConfigureAwait(false);
+                }
+                catch (Exception e)
                 {
                     stopWatch.Stop();
 
-                    await
-                        ErrorLogging(string.Format("{0} - Failed to process message.", SubscriptionName),
-                            message.MessageId,
-                            e).ConfigureAwait(false);
+                    ErrorLogging(string.Format("{0} - Failed to process message.", SubscriptionName), message.MessageId,
+                        e);
 
                     if (messageCount < MessageRepostMaxCount)
                     {
-                        await InfoLogging(
+                        InfoLogging(
                             string.Format("{0} - Reposting the message, retry #: {1}.", SubscriptionName, messageCount),
-                            message.MessageId).ConfigureAwait(false);
+                            message.MessageId);
                         repostMessage = true;
                     }
                     else
                     {
-                        await InfoLogging(
+                        InfoLogging(
                             string.Format("{0} - Done trying to repost message, message has failed to be processed.",
-                                SubscriptionName)).ConfigureAwait(false);
+                                SubscriptionName));
                     }
-                }).ConfigureAwait(false);
+                }
 
                 if (stopWatch.IsRunning)
                     stopWatch.Stop();
 
+                var timeSpan = stopWatch.Elapsed;
+                DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
+                    timeSpan.TotalSeconds);
+
                 if (repostMessage)
                     await RepostMessage(messageCount, messageBody).ConfigureAwait(false);
-
-                var timeSpan = stopWatch.Elapsed;
-                await DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
-                    timeSpan.TotalSeconds).ConfigureAwait(false);
             }
         }
 

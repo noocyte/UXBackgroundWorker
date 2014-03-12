@@ -16,6 +16,7 @@ namespace Proactima.AzureWorkers
         {
             get { return 32; }
         }
+
         protected override int LoopWaitTime
         {
             get { return 0; }
@@ -45,11 +46,12 @@ namespace Proactima.AzureWorkers
 
         public override async Task StartAsync()
         {
-            await InfoLogging(string.Format("{0} - Processing", SubscriptionName)).ConfigureAwait(false);
+            InfoLogging(string.Format("{0} - Processing", SubscriptionName));
 
             if (_queue == null)
                 await Init().ConfigureAwait(false);
 
+// ReSharper disable once PossibleNullReferenceException
             await _queue.FetchAttributesAsync().ConfigureAwait(false);
 
             if (_queue.ApproximateMessageCount > 0 && !Token.IsCancellationRequested)
@@ -59,26 +61,33 @@ namespace Proactima.AzureWorkers
                         _queue.GetMessagesAsync(MessageCount, TimeSpan.FromSeconds(30), null, null, Token)
                             .ConfigureAwait(false);
 
-                if (messages.Any())
-                {
-                    Func<Task> func = async () => { await Do(messages).ConfigureAwait(false); };
+                var cloudQueueMessages = messages as IList<CloudQueueMessage> ?? messages.ToList();
 
-                    await func.LogWith(ErrorLogging, "Processing of messages failed").ConfigureAwait(false);
+                if (cloudQueueMessages.Any())
+                {
+                    try
+                    {
+                        await Do(cloudQueueMessages).ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        ErrorLogging("Processing of messages failed", exception);
+                    }
                 }
             }
         }
 
         protected async Task DeleteMessages(IEnumerable<CloudQueueMessage> messages)
         {
-            Func<Task> func = async () =>
+            try
             {
                 foreach (var msg in messages)
-                {
                     await _queue.DeleteMessageAsync(msg, Token).ConfigureAwait(false);
-                }
-            };
-
-            await func.LogWith(ErrorLogging, "Deleting messages failed").ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                ErrorLogging("Deleting messages failed", exception);
+            }
         }
     }
 }
