@@ -39,6 +39,15 @@
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ExampleWorker\ExampleWorker.csproj">
+      <Name>ExampleWorker</Name>
+      <Project>{7f9596b8-4d96-4a2d-bddd-cbba12258f70}</Project>
+      <RoleType>Worker</RoleType>
+      <RoleName>ExampleWorker</RoleName>
+      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="ExampleWorkerContent\" />
   </ItemGroup>
   <ItemGroup>
