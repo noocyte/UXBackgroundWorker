@@ -1,3 +1,7 @@
+Build status
+================
+https://www.myget.org/BuildSource/Badge/uxrisk?identifier=556830ae-1cb6-4f66-9f8f-6d6777c0c833
+
 Proactima Azure Workers
 ==================
 
