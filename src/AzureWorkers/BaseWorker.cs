@@ -9,7 +9,15 @@ namespace Proactima.AzureWorkers
         private CancellationTokenSource _cancellationTokenSource;
         protected CancellationToken Token { get; set; }
 
-        public virtual bool Enabled { get { return true; } }
+        public virtual bool Enabled
+        {
+            get { return true; }
+        }
+
+        protected virtual int LoopWaitTime
+        {
+            get { return 1000; }
+        }
 
         public virtual async Task StartAsync()
         {
@@ -44,12 +52,14 @@ namespace Proactima.AzureWorkers
 
         public virtual void OnStop()
         {
-            _cancellationTokenSource.Cancel();
+            if (_cancellationTokenSource != null)
+                _cancellationTokenSource.Cancel();
         }
 
         protected virtual void ErrorLogging(string message, Exception ex = null)
         {
         }
+
         protected virtual void ErrorLogging(string message, string messageId = "", Exception ex = null)
         {
         }
@@ -61,7 +71,5 @@ namespace Proactima.AzureWorkers
         protected virtual void DebugLogging(string message, string messageId = "", double timerValue = 0.0)
         {
         }
-
-        protected virtual int LoopWaitTime { get { return 1000; } }
     }
 }

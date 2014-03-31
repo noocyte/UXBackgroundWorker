@@ -7,7 +7,7 @@ using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {
-    public class SimpleServicebusTopicWorker : BaseServiceBusTopicWorker
+    public class FailingServicebusTopicWorker : BaseServiceBusTopicWorker
     {
         private readonly List<string> _failedMessages = new List<string>();
 
@@ -18,13 +18,12 @@ namespace ExampleWorker
 
         protected override string TopicName
         {
-            get { return "SimpleTopic"; }
+            get { return "FailingTopic"; }
         }
 
-        protected override async Task Do(string message)
+        protected override Task Do(string message)
         {
-            var client = new HttpClient();
-            await client.GetAsync("http://blog.uxrisk.com").ConfigureAwait(false);
+            throw new NotImplementedException("This will always fail!");
         }
 
         protected override async Task HandleFailedMessageAsync(string messageBody)

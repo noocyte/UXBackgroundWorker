@@ -103,6 +103,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleQueueWorker.cs" />
     <Compile Include="SimpleServiceBusQueueWorker.cs" />
+    <Compile Include="FailingServicebusTopicWorker.cs" />
     <Compile Include="SimpleServicebusTopicWorker.cs" />
     <Compile Include="SimpleStartupTask.cs" />
     <Compile Include="DisabledWorker.cs" />
