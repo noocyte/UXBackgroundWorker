@@ -11,7 +11,7 @@ namespace ExampleWorker
             get { return false; }
         }
 
-        public override async Task StartAsync()
+        protected override async Task StartAsync()
         {
             // will never be called!
             var client = new HttpClient();

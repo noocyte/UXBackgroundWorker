@@ -14,6 +14,7 @@ namespace Proactima.AzureWorkers
     public abstract class AzureWorkerRole : NinjectRoleEntryPoint
     {
         private CancellationTokenSource _cancellationTokenSource;
+        private IKernel _kernel;
         private List<Task> Tasks { get; set; }
 
         protected virtual int TaskTimeout
@@ -27,28 +28,36 @@ namespace Proactima.AzureWorkers
         [Inject]
         public List<BaseWorker> Workers { get; set; }
 
-        protected virtual async Task ErrorLogging(string message, Exception ex = null)
+        protected virtual void ErrorLogging(string message, Exception ex = null)
         {
-            await Task.FromResult(0).ConfigureAwait(false);
         }
 
-        protected virtual async Task InfoLogging(string message)
+        protected virtual void InfoLogging(string message)
         {
-            await Task.FromResult(0).ConfigureAwait(false);
         }
 
         protected virtual void AddCustomModules(IList<INinjectModule> moduleList)
         {
         }
 
-        protected abstract void OnRoleStarting();
+        protected virtual void OnRoleStarting()
+        {
+        }
+
+        protected virtual void OnRoleStopping()
+        {
+        }
 
         protected override IKernel CreateKernel()
         {
             var modules = new List<INinjectModule> {new AzureWorkerModule()};
             AddCustomModules(modules);
+            var ninjectModules = modules.ToArray();
 
-            return new StandardKernel(modules.ToArray());
+            InfoLogging(String.Format("Adding {0} Ninject modules to the kernel", ninjectModules.Length));
+
+            _kernel = new StandardKernel(ninjectModules);
+            return _kernel;
         }
 
         public override void Run()
@@ -60,23 +69,26 @@ namespace Proactima.AzureWorkers
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
+            InfoLogging("About to run startup tasks...");
+
             foreach (var startupItem in starters)
             {
                 startupItem.Start();
             }
 
+            InfoLogging("Finished running startup tasks...");
+
             Tasks = new List<Task>();
-            var enabledWorkers = workers.Where(w => w.Enabled).ToList();
+            var enabledWorkers = CreateWorkersList(workers);
+
+            InfoLogging(String.Format("About to run {0} enabled workers...", enabledWorkers.Count));
 
             foreach (var worker in enabledWorkers)
             {
-                await worker.OnStart(_cancellationTokenSource.Token).ConfigureAwait(false);
+                Tasks.Add(worker.ProtectedRun(_cancellationTokenSource));
             }
 
-            foreach (var worker in enabledWorkers)
-            {
-                Tasks.Add(worker.ProtectedRun());
-            }
+            InfoLogging(String.Format("Finished running {0} enabled workers...", enabledWorkers.Count));
 
             int completedTaskIndex;
             while ((completedTaskIndex = Task.WaitAny(Tasks.ToArray())) != -1 && Tasks.Count > 0)
@@ -84,30 +96,59 @@ namespace Proactima.AzureWorkers
                 Tasks.RemoveAt(completedTaskIndex);
                 if (_cancellationTokenSource.Token.IsCancellationRequested) continue;
 
-                Tasks.Insert(completedTaskIndex, enabledWorkers[completedTaskIndex].ProtectedRun());
+                Tasks.Insert(completedTaskIndex,
+                    enabledWorkers[completedTaskIndex].ProtectedRun(_cancellationTokenSource));
                 await Task.Delay(1000).ConfigureAwait(false);
             }
         }
 
+        private List<BaseWorker> CreateWorkersList(IEnumerable<BaseWorker> workers)
+        {
+            var allWorkers = new List<BaseWorker>();
+            var enabledWorkers = workers.Where(w => w.Enabled);
+
+            foreach (var enabledWorker in enabledWorkers)
+            {
+                if (enabledWorker.NumberOfInstances > 1)
+                {
+                    for (var i = 2; i <= enabledWorker.NumberOfInstances; i++)
+                    {
+                        var baseWorker = (BaseWorker) _kernel.GetService(enabledWorker.GetType());
+                        baseWorker.InstanceNumber = i;
+                        allWorkers.Add(baseWorker);
+                    }
+                }
+
+                enabledWorker.InstanceNumber = 1;
+                allWorkers.Add(enabledWorker);
+            }
+
+            return allWorkers;
+        }
+
         protected override bool OnRoleStarted()
         {
+            InfoLogging("About to startup role...");
+
             ServicePointManager.DefaultConnectionLimit = 12;
             RoleEnvironment.Changing += RoleEnvironmentChanging;
 
             OnRoleStarting();
-
+            InfoLogging("Finished role startup...");
             return base.OnRoleStarted();
         }
 
         protected override void OnRoleStopped()
         {
+            InfoLogging("About to shutdown role...");
+
             _cancellationTokenSource.Cancel();
 
-            foreach (var job in Workers)
+            foreach (var worker in Workers)
             {
-                job.OnStop();
+                worker.OnStop();
                 // ReSharper disable once SuspiciousTypeConversion.Global
-                var disposable = job as IDisposable;
+                var disposable = worker as IDisposable;
                 if (disposable != null)
                     disposable.Dispose();
             }
@@ -116,15 +157,20 @@ namespace Proactima.AzureWorkers
             {
                 Task.WaitAll(Tasks.ToArray());
             }
-            catch (AggregateException)
+            catch (AggregateException exception)
             {
+                ErrorLogging("An aggregate exception was caught...", exception);
             }
 
+            OnRoleStopping();
+
+            InfoLogging("Finished role shutdown...");
             base.OnRoleStopped();
         }
 
         protected virtual void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e)
         {
+            InfoLogging("RoleEnvironmentChanging was called...");
             if (e.Changes.Any(change => change is RoleEnvironmentConfigurationSettingChange))
                 e.Cancel = true;
         }

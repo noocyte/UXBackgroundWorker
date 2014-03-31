@@ -39,7 +39,7 @@ namespace Proactima.AzureWorkers
             _queueClient = QueueClient.CreateFromConnectionString(ConnectionString, QueueName);
         }
 
-        public override async Task StartAsync()
+        protected override async Task StartAsync()
         {
             InfoLogging(string.Format("{0} - Processing", ImplementationName));
 

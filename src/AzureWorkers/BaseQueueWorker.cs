@@ -44,7 +44,7 @@ namespace Proactima.AzureWorkers
             await _queue.CreateIfNotExistsAsync().ConfigureAwait(false);
         }
 
-        public override async Task StartAsync()
+        protected override async Task StartAsync()
         {
             InfoLogging(string.Format("{0} - Processing", SubscriptionName));
 

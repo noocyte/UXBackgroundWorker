@@ -51,7 +51,7 @@ namespace Proactima.AzureWorkers
             SendMessage = topicClient.SendAsync;
         }
 
-        public override async Task StartAsync()
+        protected override async Task StartAsync()
         {
             _retryStrategy = CreateRetryPolicy(MessageRepostMaxCount);
 
@@ -72,11 +72,12 @@ namespace Proactima.AzureWorkers
                 if (String.IsNullOrEmpty(messageBody))
                     messageBody = String.Empty;
 
+                var messageId = message.MessageId;
                 message.Complete();
 
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                DebugLogging(string.Format("{0} - Received new message", SubscriptionName), message.MessageId);
+                DebugLogging(string.Format("{0} - Received new message", SubscriptionName), messageId);
                 var failed = false;
 
                 try
@@ -88,7 +89,8 @@ namespace Proactima.AzureWorkers
                     }
                     catch (Exception exception)
                     {
-                        ErrorLogging("Message processing failed after retry, posting as failed message.", exception);
+                        ErrorLogging("Message processing failed after retry, posting as failed message.", messageId,
+                            exception);
                         failed = true;
                     }
                 }
@@ -98,7 +100,7 @@ namespace Proactima.AzureWorkers
                         stopWatch.Stop();
 
                     var timeSpan = stopWatch.Elapsed;
-                    DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
+                    DebugLogging(string.Format("{0} - Processed message", SubscriptionName), messageId,
                         timeSpan.TotalSeconds);
                 }
 

@@ -14,27 +14,25 @@ namespace Proactima.AzureWorkers
             get { return true; }
         }
 
+        public virtual int NumberOfInstances
+        {
+            get { return 1; }
+        }
+
+        public int InstanceNumber { get; set; }
+
         protected virtual int LoopWaitTime
         {
             get { return 1000; }
         }
 
-        public virtual async Task StartAsync()
-        {
-            await Task.FromResult(0).ConfigureAwait(false);
-        }
+        protected abstract Task StartAsync();
 
-        public virtual async Task<bool> OnStart(CancellationToken cancellationToken)
-        {
-            Token = cancellationToken;
-            return await Task.FromResult(true).ConfigureAwait(false);
-        }
-
-        internal async Task ProtectedRun()
+        internal async Task ProtectedRun(CancellationTokenSource tokenSource)
         {
             try
             {
-                _cancellationTokenSource = new CancellationTokenSource();
+                _cancellationTokenSource = tokenSource;
                 Token = _cancellationTokenSource.Token;
 
                 while (!Token.IsCancellationRequested)
@@ -50,7 +48,7 @@ namespace Proactima.AzureWorkers
             }
         }
 
-        public virtual void OnStop()
+        internal void OnStop()
         {
             if (_cancellationTokenSource != null)
                 _cancellationTokenSource.Cancel();

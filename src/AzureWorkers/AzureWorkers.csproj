@@ -87,7 +87,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncExceptionHandler.cs" />
     <Compile Include="BaseQueueWorker.cs" />
     <Compile Include="BaseServiceBusQueueWorker.cs" />
     <Compile Include="BaseServiceBusWorker.cs" />

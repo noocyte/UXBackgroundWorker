@@ -11,16 +11,16 @@ namespace Proactima.AzureWorkers
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             this.Bind(x => x
-                  .From(assemblies)
-                  .SelectAllClasses()
-                  .InheritedFrom<BaseWorker>()
-                  .BindAllBaseClasses());
+                .From(assemblies)
+                .SelectAllClasses()
+                .InheritedFrom<BaseWorker>()
+                .BindAllBaseClasses());
 
             this.Bind(x => x
-                   .From(assemblies)
-                   .SelectAllClasses()
-                   .InheritedFrom<IStartupTask>()
-                   .BindSingleInterface());
+                .From(assemblies)
+                .SelectAllClasses()
+                .InheritedFrom<IStartupTask>()
+                .BindSingleInterface());
         }
     }
 }
