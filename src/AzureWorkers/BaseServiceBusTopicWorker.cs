@@ -68,63 +68,24 @@ namespace Proactima.AzureWorkers
 
                 message.Complete();
 
-                // try to extract a count
-                var counts = messageBody.Split('#');
-                messageBody = counts[0];
-                var messageCount = 0;
-
-                if (counts.Length > 1)
-                    Int32.TryParse(counts[1], out messageCount);
-
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 DebugLogging(string.Format("{0} - Received new message", SubscriptionName), message.MessageId);
-                var repostMessage = false;
 
                 try
                 {
                     await Do(messageBody).ConfigureAwait(false);
                 }
-                catch (Exception e)
+                finally
                 {
-                    stopWatch.Stop();
+                    if (stopWatch.IsRunning)
+                        stopWatch.Stop();
 
-                    ErrorLogging(string.Format("{0} - Failed to process message.", SubscriptionName), message.MessageId,
-                        e);
-
-                    if (messageCount < MessageRepostMaxCount)
-                    {
-                        InfoLogging(
-                            string.Format("{0} - Reposting the message, retry #: {1}.", SubscriptionName, messageCount),
-                            message.MessageId);
-                        repostMessage = true;
-                    }
-                    else
-                    {
-                        InfoLogging(
-                            string.Format("{0} - Done trying to repost message, message has failed to be processed.",
-                                SubscriptionName));
-                    }
+                    var timeSpan = stopWatch.Elapsed;
+                    DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
+                        timeSpan.TotalSeconds);   
                 }
-
-                if (stopWatch.IsRunning)
-                    stopWatch.Stop();
-
-                var timeSpan = stopWatch.Elapsed;
-                DebugLogging(string.Format("{0} - Processed message", SubscriptionName), message.MessageId,
-                    timeSpan.TotalSeconds);
-
-                if (repostMessage)
-                    await RepostMessage(messageCount, messageBody).ConfigureAwait(false);
             }
-        }
-
-        private async Task RepostMessage(int messageCount, string messageBody)
-        {
-            messageCount++;
-
-            var appendedMessageBody = String.Format("{0}#{1}", messageBody, messageCount);
-            await SendMessage(new BrokeredMessage(appendedMessageBody)).ConfigureAwait(false);
         }
     }
 }
