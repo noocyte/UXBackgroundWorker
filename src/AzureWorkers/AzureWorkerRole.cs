@@ -79,7 +79,7 @@ namespace Proactima.AzureWorkers
             InfoLogging("Finished running startup tasks...");
 
             Tasks = new List<Task>();
-            var enabledWorkers = CreateWorkersList(workers);
+            var enabledWorkers = workers.Where(w => w.Enabled).ToList();
 
             InfoLogging(String.Format("About to run {0} enabled workers...", enabledWorkers.Count));
 
@@ -100,30 +100,6 @@ namespace Proactima.AzureWorkers
                     enabledWorkers[completedTaskIndex].ProtectedRun(_cancellationTokenSource));
                 await Task.Delay(1000).ConfigureAwait(false);
             }
-        }
-
-        private List<BaseWorker> CreateWorkersList(IEnumerable<BaseWorker> workers)
-        {
-            var allWorkers = new List<BaseWorker>();
-            var enabledWorkers = workers.Where(w => w.Enabled);
-
-            foreach (var enabledWorker in enabledWorkers)
-            {
-                if (enabledWorker.NumberOfInstances > 1)
-                {
-                    for (var i = 2; i <= enabledWorker.NumberOfInstances; i++)
-                    {
-                        var baseWorker = (BaseWorker) _kernel.GetService(enabledWorker.GetType());
-                        baseWorker.InstanceNumber = i;
-                        allWorkers.Add(baseWorker);
-                    }
-                }
-
-                enabledWorker.InstanceNumber = 1;
-                allWorkers.Add(enabledWorker);
-            }
-
-            return allWorkers;
         }
 
         protected override bool OnRoleStarted()

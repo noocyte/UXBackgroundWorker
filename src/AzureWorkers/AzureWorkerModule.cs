@@ -14,7 +14,7 @@ namespace Proactima.AzureWorkers
                 .From(assemblies)
                 .SelectAllClasses()
                 .InheritedFrom<BaseWorker>()
-                .BindAllBaseClasses());
+                .BindWith<MultiBaseBindingGenerator>());
 
             this.Bind(x => x
                 .From(assemblies)

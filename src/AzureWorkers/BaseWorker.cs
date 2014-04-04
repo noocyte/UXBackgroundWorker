@@ -14,13 +14,6 @@ namespace Proactima.AzureWorkers
             get { return true; }
         }
 
-        public virtual int NumberOfInstances
-        {
-            get { return 1; }
-        }
-
-        public int InstanceNumber { get; set; }
-
         protected virtual int LoopWaitTime
         {
             get { return 1000; }
