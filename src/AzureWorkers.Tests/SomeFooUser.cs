@@ -30,4 +30,9 @@ namespace AzureWorkers.Tests
     public class Bar : Foo
     {
     }
+
+    public class FooBar : Bar
+    {
+        
+    }
 }

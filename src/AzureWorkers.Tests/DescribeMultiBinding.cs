@@ -31,9 +31,10 @@ namespace AzureWorkers.Tests
             var foos = kernel.Get<SomeFooUser>().Foos.ToList();
 
             // t
-            foos.Should().HaveCount(5);
+            foos.Should().HaveCount(6);
             foos.Count(f => f.GetType() == typeof (SomeFoo)).Should().Be(2);
             foos.Count(f => f.GetType() == typeof (OtherFoo)).Should().Be(2);
+            foos.Count(f => f.GetType() == typeof(FooBar)).Should().Be(1);
         }
 
         [Test]
