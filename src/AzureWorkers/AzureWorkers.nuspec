@@ -13,7 +13,7 @@
     <copyright>Copyright © Proactima Solutions AS - 2013</copyright>
     <dependencies>
       <dependency id="Ninject" version="3.2" />
-      <dependency id="Ninject.Extensions.Azure" version="3.2" />
+      <dependency id="Ninject.Extensions.Azure.Proactima" version="3.2" />
       <dependency id="Ninject.Extensions.Conventions" version="3.2" />
       <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="2.0" />
       <dependency id="WindowsAzure.ServiceBus" version="2.2" />
