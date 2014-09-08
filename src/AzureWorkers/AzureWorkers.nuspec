@@ -22,8 +22,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\bin\AzureWorkers.dll" target="lib\net451" />
-    <file src="..\..\bin\AzureWorkers.pdb" target="lib\net451" />
-    <file src="..\..\bin\AzureWorkers.XML" target="lib\net451" />
+    <file src="..\..\bin\Proactima.AzureWorkers.dll" target="lib\net451" />
+    <file src="..\..\bin\Proactima.AzureWorkers.pdb" target="lib\net451" />
+    <file src="..\..\bin\Proactima.AzureWorkers.XML" target="lib\net451" />
   </files>
 </package>
