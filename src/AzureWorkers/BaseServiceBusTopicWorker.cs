@@ -2,9 +2,8 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
-using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
-using RetryPolicy = Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.RetryPolicy;
+using Ninject;
 
 namespace Proactima.AzureWorkers
 {
@@ -17,10 +16,10 @@ namespace Proactima.AzureWorkers
             MessageRepostMaxCount = 3;
         }
 
-        protected abstract string TopicName { get; }
+        [Inject]
+        public Func<string, string, SubscriptionClient> SubClientCreator { get; set; }
 
-        protected virtual Func<TimeSpan, Task<BrokeredMessage>> GetMessage { get; set; }
-        protected virtual Func<BrokeredMessage, Task> SendMessage { get; set; }
+        protected abstract string TopicName { get; }
 
         protected int MessageRepostMaxCount { get; set; }
 
@@ -31,43 +30,20 @@ namespace Proactima.AzureWorkers
 
         protected abstract Task Do(string message);
 
-        protected virtual async Task Init()
+        protected override async Task StartAsync()
         {
             InfoLogging(string.Format("{0} - Processing", SubscriptionName));
 
-            var namespaceManager = NamespaceManager.CreateFromConnectionString(ConnectionString);
+            var subClient = SubClientCreator(TopicName, SubscriptionName);
 
-            if (!await namespaceManager.TopicExistsAsync(TopicName).ConfigureAwait(false))
-                await namespaceManager.CreateTopicAsync(TopicName).ConfigureAwait(false);
-
-            if (!await namespaceManager.SubscriptionExistsAsync(TopicName, SubscriptionName).ConfigureAwait(false))
-                await namespaceManager.CreateSubscriptionAsync(TopicName, SubscriptionName).ConfigureAwait(false);
-
-            // setup delegates to abstract away Service Bus stuff
-            var subClient = SubscriptionClient.CreateFromConnectionString(ConnectionString, TopicName, SubscriptionName);
-            var topicClient = TopicClient.CreateFromConnectionString(ConnectionString, TopicName);
-
-            GetMessage = subClient.ReceiveAsync;
-            SendMessage = topicClient.SendAsync;
-        }
-
-        protected override async Task StartAsync()
-        {
             _retryStrategy = CreateRetryPolicy(MessageRepostMaxCount);
+            var stopWatch = new Stopwatch();
 
-            if (GetMessage == null || SendMessage == null)
-                await Init().ConfigureAwait(false);
-
-            BrokeredMessage message = null;
-
-            while (message == null && !Token.IsCancellationRequested)
+            while (!Token.IsCancellationRequested)
             {
-// ReSharper disable once PossibleNullReferenceException
-                message = await GetMessage(new TimeSpan(0, 0, 10)).ConfigureAwait(false);
-            }
+                var message = await subClient.ReceiveAsync(new TimeSpan(0, 0, 10)).ConfigureAwait(false);
+                if (message == null) continue;
 
-            if (message != null)
-            {
                 var messageBody = message.GetBody<string>();
                 if (String.IsNullOrEmpty(messageBody))
                     messageBody = String.Empty;
@@ -75,33 +51,26 @@ namespace Proactima.AzureWorkers
                 var messageId = message.MessageId;
                 message.Complete();
 
-                var stopWatch = new Stopwatch();
-                stopWatch.Start();
                 DebugLogging(string.Format("{0} - Received new message", SubscriptionName), messageId);
                 var failed = false;
+                stopWatch.Restart();
 
                 try
                 {
-                    try
-                    {
-                        await _retryStrategy.ExecuteAsync(() =>
-                            Do(messageBody), Token).ConfigureAwait(false);
-                    }
-                    catch (Exception exception)
-                    {
-                        ErrorLogging("Message processing failed after retry, posting as failed message.", messageId,
-                            exception);
-                        failed = true;
-                    }
-                }
-                finally
-                {
-                    if (stopWatch.IsRunning)
-                        stopWatch.Stop();
+                    await _retryStrategy.ExecuteAsync(() =>
+                        Do(messageBody), Token).ConfigureAwait(false);
 
+                    stopWatch.Stop();
                     var timeSpan = stopWatch.Elapsed;
-                    DebugLogging(string.Format("{0} - Processed message", SubscriptionName), messageId,
+                    DebugLogging(string.Format("{0} - Processed message",
+                        SubscriptionName), messageId,
                         timeSpan.TotalSeconds);
+                }
+                catch (Exception exception)
+                {
+                    ErrorLogging("Message processing failed after retry, posting as failed message.", messageId,
+                        exception);
+                    failed = true;
                 }
 
                 if (failed)
