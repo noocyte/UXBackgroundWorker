@@ -28,14 +28,15 @@ namespace Proactima.AzureWorkers
                 var cs = CloudConfigurationManager.GetSetting("ServiceBusConnectionString");
                 var fac = MessagingFactory.CreateFromConnectionString(cs);
                 return fac;
-            });
+            }).InSingletonScope();
 
             // TopicClient
             var topicClientFunc = new Func<string, TopicClient>(topicName =>
             {
-                var messagingFactory = Kernel.Get<MessagingFactory>();
                 var client = Kernel.TryGet<TopicClient>(topicName);
                 if (client != null) return client;
+
+                var messagingFactory = Kernel.Get<MessagingFactory>();
 
                 var namespaceMgr = Kernel.Get<NamespaceManager>();
                 if (!namespaceMgr.TopicExists(topicName))
@@ -45,7 +46,6 @@ namespace Proactima.AzureWorkers
                     .ToMethod(context => messagingFactory.CreateTopicClient(topicName))
                     .InSingletonScope()
                     .Named(topicName);
-
 
                 client = Kernel.Get<TopicClient>(topicName);
                 return client;
