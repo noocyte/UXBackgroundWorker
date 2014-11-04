@@ -104,6 +104,7 @@
   <ItemGroup>
     <Compile Include="BaseCloudQueueWorker.cs" />
     <Compile Include="BaseServiceBusQueueWorker.cs" />
+    <Compile Include="NinjectModuleExtensions.cs" />
     <Compile Include="ClientFactory.cs" />
     <Compile Include="ICreateClients.cs" />
     <Compile Include="InstanceAttribute.cs" />

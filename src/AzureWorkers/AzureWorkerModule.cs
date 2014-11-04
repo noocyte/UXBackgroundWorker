@@ -3,7 +3,6 @@ using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using Ninject;
 using Ninject.Extensions.Conventions;
 using Ninject.Modules;
@@ -14,42 +13,40 @@ namespace Proactima.AzureWorkers
     {
         private readonly string _servicebusConnection =
             CloudConfigurationManager.GetSetting("ServiceBusConnectionString");
+
         private readonly string _storageConnection =
-    CloudConfigurationManager.GetSetting("StorageConnectionString");
+            CloudConfigurationManager.GetSetting("StorageConnectionString");
 
         public override void Load()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             Bind<ICreateClients>().To<ClientFactory>();
-            Bind<CloudStorageAccount>().ToMethod(context =>
+
+            this.BindUnlessBoundAsSingleton(c =>
             {
                 var storageAccount = CloudStorageAccount.Parse(_storageConnection);
                 return storageAccount;
-            }).InSingletonScope();
+            });
 
-            Bind<CloudQueueClient>().ToMethod(context =>
+            this.BindUnlessBoundAsSingleton(c =>
             {
                 var storageAccount = Kernel.Get<CloudStorageAccount>();
                 var queueClient = storageAccount.CreateCloudQueueClient();
                 return queueClient;
-            }).InSingletonScope();
-            
-            Bind<NamespaceManager>()
-                .ToMethod(context =>
-                {
-                    var namespaceManager = NamespaceManager.CreateFromConnectionString(_servicebusConnection);
-                    return namespaceManager;
-                })
-                .InSingletonScope();
+            });
 
-            Bind<MessagingFactory>()
-                .ToMethod(context =>
-                {
-                    var fac = MessagingFactory.CreateFromConnectionString(_servicebusConnection);
-                    return fac;
-                })
-                .InSingletonScope();
+            this.BindUnlessBoundAsSingleton(c =>
+            {
+                var namespaceManager = NamespaceManager.CreateFromConnectionString(_servicebusConnection);
+                return namespaceManager;
+            });
+
+            this.BindUnlessBoundAsSingleton(c =>
+            {
+                var fac = MessagingFactory.CreateFromConnectionString(_servicebusConnection);
+                return fac;
+            });
 
             this.Bind(x => x
                 .From(assemblies)
