@@ -4,8 +4,8 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
-      <Setting name="ServiceBusConnectionString" value="[you connection string here please!]" />
-      <Setting name="StorageConnectionString" value="[your connection string here please!]" />
+      <Setting name="ServiceBusConnectionString" value="yours here" />
+      <Setting name="StorageConnectionString" value="yours here" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>
