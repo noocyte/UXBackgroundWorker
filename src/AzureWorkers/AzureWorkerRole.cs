@@ -40,11 +40,11 @@ namespace Proactima.AzureWorkers
         {
         }
 
-        protected virtual void OnRoleStarting()
+        protected virtual void OnRoleIsStarting()
         {
         }
 
-        protected virtual void OnRoleStopping()
+        protected virtual void OnRoleIsStopping()
         {
         }
 
@@ -65,7 +65,7 @@ namespace Proactima.AzureWorkers
             Run(Workers, Starters);
         }
 
-        public async void Run(IEnumerable<BaseWorker> workers, IEnumerable<IStartupTask> starters)
+        private async void Run(IEnumerable<BaseWorker> workers, IEnumerable<IStartupTask> starters)
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
@@ -109,7 +109,7 @@ namespace Proactima.AzureWorkers
             ServicePointManager.DefaultConnectionLimit = 12;
             RoleEnvironment.Changing += RoleEnvironmentChanging;
 
-            OnRoleStarting();
+            OnRoleIsStarting();
             InfoLogging("Finished role startup...");
             return base.OnRoleStarted();
         }
@@ -138,7 +138,7 @@ namespace Proactima.AzureWorkers
                 ErrorLogging("An aggregate exception was caught...", exception);
             }
 
-            OnRoleStopping();
+            OnRoleIsStopping();
 
             InfoLogging("Finished role shutdown...");
             base.OnRoleStopped();

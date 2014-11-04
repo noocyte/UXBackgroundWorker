@@ -7,6 +7,10 @@ namespace ExampleWorker
 {
     public class SimpleServiceBusQueueWorker : BaseServiceBusQueueWorker
     {
+        public SimpleServiceBusQueueWorker(ICreateClients clientFactory) : base(clientFactory)
+        {
+        }
+
         protected override string QueueName
         {
             get { return "RandomQueue"; }

@@ -31,7 +31,7 @@ namespace Proactima.AzureWorkers
         {
             InfoLogging(string.Format("{0} - Processing", SubscriptionName));
 
-            var subClient = _clientFactory.CreateSubscriptionClient(TopicName, SubscriptionName);
+            var subClient = await _clientFactory.CreateSubscriptionClientAsync(TopicName, SubscriptionName).ConfigureAwait(false);
 
             _retryStrategy = CreateRetryPolicy(MessageRepostMaxCount);
             var stopWatch = new Stopwatch();

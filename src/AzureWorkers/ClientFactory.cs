@@ -1,4 +1,5 @@
-﻿using Microsoft.ServiceBus;
+﻿using System.Threading.Tasks;
+using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using Ninject;
 
@@ -6,8 +7,9 @@ namespace Proactima.AzureWorkers
 {
     public interface ICreateClients
     {
-        TopicClient CreateTopicClient(string topicName);
-        SubscriptionClient CreateSubscriptionClient(string topicName, string subscriptionName);
+        Task<QueueClient> CreateQueueClientAsync(string queueName);
+        Task<TopicClient> CreateTopicClientAsync(string topicName);
+        Task<SubscriptionClient> CreateSubscriptionClientAsync(string topicName, string subscriptionName);
     }
 
     public class ClientFactory : ICreateClients
@@ -19,7 +21,28 @@ namespace Proactima.AzureWorkers
             _kernel = kernel;
         }
 
-        public TopicClient CreateTopicClient(string topicName)
+        public async Task<QueueClient> CreateQueueClientAsync(string queueName)
+        {
+            var client = _kernel.TryGet<QueueClient>(queueName);
+            if (client != null) return client;
+
+            var namespaceMgr = _kernel.Get<NamespaceManager>();
+
+            if (!await namespaceMgr.QueueExistsAsync(queueName).ConfigureAwait(false))
+                await namespaceMgr.CreateQueueAsync(queueName).ConfigureAwait(false);
+
+            var messagingFactory = _kernel.Get<MessagingFactory>();
+
+            _kernel.Bind<QueueClient>()
+               .ToMethod(context => messagingFactory.CreateQueueClient(queueName))
+               .InSingletonScope()
+               .Named(queueName);
+
+            client = _kernel.Get<QueueClient>(queueName);
+            return client;
+        }
+
+        public async Task<TopicClient> CreateTopicClientAsync(string topicName)
         {
             var client = _kernel.TryGet<TopicClient>(topicName);
             if (client != null) return client;
@@ -27,8 +50,8 @@ namespace Proactima.AzureWorkers
             var messagingFactory = _kernel.Get<MessagingFactory>();
 
             var namespaceMgr = _kernel.Get<NamespaceManager>();
-            if (!namespaceMgr.TopicExists(topicName))
-                namespaceMgr.CreateTopic(topicName);
+            if (!await namespaceMgr.TopicExistsAsync(topicName).ConfigureAwait(false))
+                await namespaceMgr.CreateTopicAsync(topicName).ConfigureAwait(false);
 
             _kernel.Bind<TopicClient>()
                 .ToMethod(context => messagingFactory.CreateTopicClient(topicName))
@@ -39,7 +62,7 @@ namespace Proactima.AzureWorkers
             return client;
         }
 
-        public SubscriptionClient CreateSubscriptionClient(string topicName, string subscriptionName)
+        public async Task<SubscriptionClient> CreateSubscriptionClientAsync(string topicName, string subscriptionName)
         {
             var client = _kernel.TryGet<SubscriptionClient>(subscriptionName);
             if (client != null) return client;
@@ -47,11 +70,11 @@ namespace Proactima.AzureWorkers
             var messagingFactory = _kernel.Get<MessagingFactory>();
 
             var namespaceMgr = _kernel.Get<NamespaceManager>();
-            if (!namespaceMgr.TopicExists(topicName))
-                namespaceMgr.CreateTopic(topicName);
+            if (!await namespaceMgr.TopicExistsAsync(topicName).ConfigureAwait(false))
+                await namespaceMgr.CreateTopicAsync(topicName).ConfigureAwait(false);
 
-            if (!namespaceMgr.SubscriptionExists(topicName, subscriptionName))
-                namespaceMgr.CreateSubscription(topicName, subscriptionName);
+            if (!await namespaceMgr.SubscriptionExistsAsync(topicName, subscriptionName).ConfigureAwait(false))
+                await namespaceMgr.CreateSubscriptionAsync(topicName, subscriptionName).ConfigureAwait(false);
 
             _kernel.Bind<SubscriptionClient>()
                 .ToMethod(context => messagingFactory.CreateSubscriptionClient(topicName, subscriptionName))
