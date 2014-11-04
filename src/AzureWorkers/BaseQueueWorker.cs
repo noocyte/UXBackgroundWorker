@@ -1,79 +1,75 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace Proactima.AzureWorkers
 {
     public abstract class BaseQueueWorker : BaseWorker
     {
+        private readonly ICreateClients _clientFactory;
         private CloudQueue _queue;
+
+        public BaseQueueWorker(ICreateClients clientFactory)
+        {
+            _clientFactory = clientFactory;
+        }
 
         protected virtual int MessageCount
         {
             get { return 32; }
         }
 
+        /// <summary>
+        /// Will wait 5000 ms (5s) by default before requesting more messages.
+        /// </summary>
         protected override int LoopWaitTime
         {
-            get { return 0; }
-        }
-
-        protected virtual string ConnectionString
-        {
-            get { return CloudConfigurationManager.GetSetting("StorageConnectionString"); }
+            get { return 5000; }
         }
 
         protected abstract string QueueName { get; }
 
-        private string SubscriptionName
-        {
-            get { return GetType().Name; }
-        }
-
         protected abstract Task Do(IEnumerable<CloudQueueMessage> messages);
-
-        protected virtual async Task Init()
-        {
-            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
-            var queueClient = storageAccount.CreateCloudQueueClient();
-            _queue = queueClient.GetQueueReference(QueueName);
-            await _queue.CreateIfNotExistsAsync().ConfigureAwait(false);
-        }
 
         protected override async Task StartAsync()
         {
-            InfoLogging(string.Format("{0} - Processing", SubscriptionName));
+            InfoLogging(string.Format("{0} - Processing", QueueName));
 
-            if (_queue == null)
-                await Init().ConfigureAwait(false);
+            _queue = await _clientFactory.CreateStorageQueueClientAsync(QueueName).ConfigureAwait(false);
 
-// ReSharper disable once PossibleNullReferenceException
-            await _queue.FetchAttributesAsync().ConfigureAwait(false);
+            var stopWatch = new Stopwatch();
 
-            if (_queue.ApproximateMessageCount > 0 && !Token.IsCancellationRequested)
+            while (!Token.IsCancellationRequested)
             {
-                var messages =
-                    await
-                        _queue.GetMessagesAsync(MessageCount, TimeSpan.FromSeconds(30), null, null, Token)
-                            .ConfigureAwait(false);
+                await _queue.FetchAttributesAsync().ConfigureAwait(false);
+                if (_queue.ApproximateMessageCount.GetValueOrDefault() <= 0)
+                {
+                    await Task.Delay(LoopWaitTime).ConfigureAwait(false);
+                    continue;
+                }
+
+                var messages = await _queue
+                    .GetMessagesAsync(MessageCount, TimeSpan.FromSeconds(10), null, null, Token)
+                    .ConfigureAwait(false);
 
                 var cloudQueueMessages = messages as IList<CloudQueueMessage> ?? messages.ToList();
 
-                if (cloudQueueMessages.Any())
-                {
-                    try
-                    {
-                        await Do(cloudQueueMessages).ConfigureAwait(false);
-                    }
-                    catch (Exception exception)
-                    {
-                        ErrorLogging("Processing of messages failed", exception);
-                    }
-                }
+                if (!cloudQueueMessages.Any()) continue;
+
+                var correlationId = Guid.NewGuid().ToString();
+                DebugLogging(string.Format("{0} - Received {1} new messages", QueueName, cloudQueueMessages.Count),
+                    correlationId);
+                stopWatch.Restart();
+
+                await Do(cloudQueueMessages).ConfigureAwait(false);
+
+                stopWatch.Stop();
+                var timeSpan = stopWatch.Elapsed;
+                DebugLogging(string.Format("{0} - Processed messages", QueueName), correlationId,
+                    timeSpan.TotalSeconds);
             }
         }
 
@@ -81,8 +77,9 @@ namespace Proactima.AzureWorkers
         {
             try
             {
-                foreach (var msg in messages)
-                    await _queue.DeleteMessageAsync(msg, Token).ConfigureAwait(false);
+                await Task
+                    .WhenAll(messages.Select(msg => _queue.DeleteMessageAsync(msg, Token)))
+                    .ConfigureAwait(false);
             }
             catch (Exception exception)
             {

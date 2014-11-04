@@ -1,13 +1,15 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
+using Microsoft.WindowsAzure.Storage.Queue;
 using Ninject;
 
 namespace Proactima.AzureWorkers
 {
     public interface ICreateClients
     {
-        Task<QueueClient> CreateQueueClientAsync(string queueName);
+        Task<CloudQueue> CreateStorageQueueClientAsync(string queueName);
+        Task<QueueClient> CreateServicebusQueueClientAsync(string queueName);
         Task<TopicClient> CreateTopicClientAsync(string topicName);
         Task<SubscriptionClient> CreateSubscriptionClientAsync(string topicName, string subscriptionName);
     }
@@ -21,7 +23,20 @@ namespace Proactima.AzureWorkers
             _kernel = kernel;
         }
 
-        public async Task<QueueClient> CreateQueueClientAsync(string queueName)
+        public async Task<CloudQueue> CreateStorageQueueClientAsync(string queueName)
+        {
+            var client = _kernel.TryGet<CloudQueue>(queueName);
+            if (client != null) return client;
+
+            var queueClient = _kernel.Get<CloudQueueClient>();
+
+            var queue = queueClient.GetQueueReference(queueName);
+            await queue.CreateIfNotExistsAsync().ConfigureAwait(false);
+
+            return queue;
+        }
+
+        public async Task<QueueClient> CreateServicebusQueueClientAsync(string queueName)
         {
             var client = _kernel.TryGet<QueueClient>(queueName);
             if (client != null) return client;
@@ -34,9 +49,9 @@ namespace Proactima.AzureWorkers
             var messagingFactory = _kernel.Get<MessagingFactory>();
 
             _kernel.Bind<QueueClient>()
-               .ToMethod(context => messagingFactory.CreateQueueClient(queueName))
-               .InSingletonScope()
-               .Named(queueName);
+                .ToMethod(context => messagingFactory.CreateQueueClient(queueName))
+                .InSingletonScope()
+                .Named(queueName);
 
             client = _kernel.Get<QueueClient>(queueName);
             return client;

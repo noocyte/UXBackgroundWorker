@@ -7,6 +7,10 @@ namespace ExampleWorker
 {
     public class SimpleQueueWorker : BaseQueueWorker
     {
+        public SimpleQueueWorker(ICreateClients clientFactory) : base(clientFactory)
+        {
+        }
+
         protected override string QueueName
         {
             get { return "dummy"; }

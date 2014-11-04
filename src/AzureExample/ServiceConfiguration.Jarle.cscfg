@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="AzureExample" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2014-06.2.4">
+  <Role name="ExampleWorker">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="ServiceBusConnectionString" value="Endpoint=sb://uxriskjnydev.servicebus.windows.net/;SharedSecretIssuer=owner;SharedSecretValue=bpJX5ho0PTNVlJ2yFGqSaa3C7xBCvn8U2SF1p94CW/0=" />
+      <Setting name="StorageConnectionString" value="DefaultEndpointsProtocol=https;AccountName=jnydev;AccountKey=sqHT46aJR8RsgX93g8wDAiAx2MPZ4ywF3gcR5tIDXrKBK5BqekjIVZkZOZJs8xmbiuOJ4dfus8m9pihvYEK4BQ==" />
+    </ConfigurationSettings>
+  </Role>
+</ServiceConfiguration>

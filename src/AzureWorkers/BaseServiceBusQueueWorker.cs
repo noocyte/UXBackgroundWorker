@@ -35,7 +35,7 @@ namespace Proactima.AzureWorkers
         {
             InfoLogging(string.Format("{0} - Processing", QueueName));
 
-            _queueClient = await _clientFactory.CreateQueueClientAsync(QueueName).ConfigureAwait(false);
+            _queueClient = await _clientFactory.CreateServicebusQueueClientAsync(QueueName).ConfigureAwait(false);
 
             var stopWatch = new Stopwatch();
 
