@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Ninject.Extensions.Azure.Clients;
 using Proactima.AzureWorkers;
 
 namespace ExampleWorker

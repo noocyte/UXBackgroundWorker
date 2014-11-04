@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Queue;
+using Ninject.Extensions.Azure.Clients;
 
 namespace Proactima.AzureWorkers
 {

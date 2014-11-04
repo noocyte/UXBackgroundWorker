@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
+using Ninject.Extensions.Azure.Clients;
 
 namespace Proactima.AzureWorkers
 {

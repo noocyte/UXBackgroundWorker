@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
+using Ninject.Extensions.Azure.Clients;
 using Proactima.AzureWorkers;
 
 namespace ExampleWorker
