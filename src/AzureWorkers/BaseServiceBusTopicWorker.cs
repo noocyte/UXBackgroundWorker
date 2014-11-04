@@ -18,7 +18,11 @@ namespace Proactima.AzureWorkers
 
         protected abstract string TopicName { get; }
 
-        protected int MessageRepostMaxCount { get; set; }
+        /// <summary>
+        /// Default = 3, set to another value to change how often a message is
+        /// reposted incase of exceptions in the worker.
+        /// </summary>
+        protected int MessageRepostMaxCount { private get; set; }
 
         private string SubscriptionName
         {

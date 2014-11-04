@@ -7,12 +7,12 @@ using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace Proactima.AzureWorkers
 {
-    public abstract class BaseQueueWorker : BaseWorker
+    public abstract class BaseCloudQueueWorker : BaseWorker
     {
         private readonly ICreateClients _clientFactory;
         private CloudQueue _queue;
 
-        public BaseQueueWorker(ICreateClients clientFactory)
+        public BaseCloudQueueWorker(ICreateClients clientFactory)
         {
             _clientFactory = clientFactory;
         }

@@ -5,9 +5,9 @@ using Proactima.AzureWorkers;
 
 namespace ExampleWorker
 {
-    public class SimpleQueueWorker : BaseQueueWorker
+    public class SimpleCloudQueueWorker : BaseCloudQueueWorker
     {
-        public SimpleQueueWorker(ICreateClients clientFactory) : base(clientFactory)
+        public SimpleCloudQueueWorker(ICreateClients clientFactory) : base(clientFactory)
         {
         }
 

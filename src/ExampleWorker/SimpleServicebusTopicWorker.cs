@@ -12,8 +12,8 @@ namespace ExampleWorker
 
         public SimpleServicebusTopicWorker(ICreateClients clientFactory) : base(clientFactory)
         {
+            MessageRepostMaxCount = 4;
         }
-
         protected override string TopicName
         {
             get { return "SimpleTopic"; }

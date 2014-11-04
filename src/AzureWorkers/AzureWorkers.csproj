@@ -102,7 +102,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseQueueWorker.cs" />
+    <Compile Include="BaseCloudQueueWorker.cs" />
     <Compile Include="BaseServiceBusQueueWorker.cs" />
     <Compile Include="ClientFactory.cs" />
     <Compile Include="ICreateClients.cs" />
