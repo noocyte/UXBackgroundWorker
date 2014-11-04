@@ -2,22 +2,19 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
-using Microsoft.ServiceBus.Messaging;
-using Ninject;
 
 namespace Proactima.AzureWorkers
 {
     public abstract class BaseServiceBusTopicWorker : BaseServiceBusWorker
     {
+        private readonly ICreateClients _clientFactory;
         private RetryPolicy _retryStrategy;
 
-        protected BaseServiceBusTopicWorker()
+        protected BaseServiceBusTopicWorker(ICreateClients clientFactory)
         {
+            _clientFactory = clientFactory;
             MessageRepostMaxCount = 3;
         }
-
-        [Inject]
-        public Func<string, string, SubscriptionClient> SubClientCreator { get; set; }
 
         protected abstract string TopicName { get; }
 
@@ -34,7 +31,7 @@ namespace Proactima.AzureWorkers
         {
             InfoLogging(string.Format("{0} - Processing", SubscriptionName));
 
-            var subClient = SubClientCreator(TopicName, SubscriptionName);
+            var subClient = _clientFactory.CreateSubscriptionClient(TopicName, SubscriptionName);
 
             _retryStrategy = CreateRetryPolicy(MessageRepostMaxCount);
             var stopWatch = new Stopwatch();

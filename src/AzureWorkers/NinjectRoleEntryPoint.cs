@@ -8,11 +8,11 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using Microsoft.WindowsAzure.ServiceRuntime;
+
+// ReSharper disable once CheckNamespace
 namespace Ninject.Extensions.Azure
 {
-    using Microsoft.WindowsAzure.ServiceRuntime;
-    using Ninject;
-
     /// <summary>
     /// Abstract implementation of a ninject-capable RoleEntryPoint for azure roles.
     /// </summary>
@@ -26,11 +26,11 @@ namespace Ninject.Extensions.Azure
         /// <returns>
         /// True if initialization succeeds, False if it fails. The default implementation returns True.
         /// </returns>
-        public sealed override bool OnStart()
+        public override sealed bool OnStart()
         {
-            this.Kernel = this.CreateKernel();
-            this.Kernel.Inject(this);
-            return this.OnRoleStarted();
+            Kernel = CreateKernel();
+            Kernel.Inject(this);
+            return OnRoleStarted();
         }
 
         /// <summary>
@@ -42,17 +42,17 @@ namespace Ninject.Extensions.Azure
         /// <summary>
         /// Called by Windows Azure when the role instance is to be stopped.
         /// </summary>
-        public sealed override void OnStop()
+        public override sealed void OnStop()
         {
-            this.OnRoleStopping();
+            OnRoleStopping();
 
-            if (this.Kernel != null)
+            if (Kernel != null)
             {
-                this.Kernel.Dispose();
-                this.Kernel = null;
+                Kernel.Dispose();
+                Kernel = null;
             }
 
-            this.OnRoleStopped();
+            OnRoleStopped();
         }
 
         /// <summary>

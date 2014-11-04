@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Proactima.AzureWorkers;
@@ -8,6 +9,10 @@ namespace ExampleWorker
     public class SimpleServicebusTopicWorker : BaseServiceBusTopicWorker
     {
         private readonly List<string> _failedMessages = new List<string>();
+
+        public SimpleServicebusTopicWorker(ICreateClients clientFactory) : base(clientFactory)
+        {
+        }
 
         protected override string TopicName
         {
@@ -23,6 +28,16 @@ namespace ExampleWorker
         protected override async Task HandleFailedMessageAsync(string messageBody)
         {
             await Task.Factory.StartNew(() => _failedMessages.Add(messageBody));
+        }
+
+        protected override void DebugLogging(string message, string messageId = "", double timerValue = 0)
+        {
+            Debug.WriteLine("msg: {0}, timer: {1}", message, timerValue);
+        }
+
+        protected override void InfoLogging(string message, string messageId = "")
+        {
+            Debug.WriteLine("msg: {0}", message);
         }
     }
 }
