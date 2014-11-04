@@ -7,7 +7,7 @@ using Microsoft.ServiceBus.Messaging;
 
 namespace Proactima.AzureWorkers
 {
-    public abstract class BaseServiceBusQueueWorker : BaseServiceBusWorker
+    public abstract class BaseServiceBusQueueWorker : BaseWorker
     {
         private readonly ICreateClients _clientFactory;
         private QueueClient _queueClient;

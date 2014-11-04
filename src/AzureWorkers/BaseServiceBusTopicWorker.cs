@@ -5,7 +5,7 @@ using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Proactima.AzureWorkers
 {
-    public abstract class BaseServiceBusTopicWorker : BaseServiceBusWorker
+    public abstract class BaseServiceBusTopicWorker : BaseWorker
     {
         private readonly ICreateClients _clientFactory;
         private RetryPolicy _retryStrategy;

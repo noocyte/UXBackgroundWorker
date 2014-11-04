@@ -6,14 +6,6 @@ using Ninject;
 
 namespace Proactima.AzureWorkers
 {
-    public interface ICreateClients
-    {
-        Task<CloudQueue> CreateStorageQueueClientAsync(string queueName);
-        Task<QueueClient> CreateServicebusQueueClientAsync(string queueName);
-        Task<TopicClient> CreateTopicClientAsync(string topicName);
-        Task<SubscriptionClient> CreateSubscriptionClientAsync(string topicName, string subscriptionName);
-    }
-
     public class ClientFactory : ICreateClients
     {
         private readonly IKernel _kernel;

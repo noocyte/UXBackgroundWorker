@@ -104,8 +104,8 @@
   <ItemGroup>
     <Compile Include="BaseQueueWorker.cs" />
     <Compile Include="BaseServiceBusQueueWorker.cs" />
-    <Compile Include="BaseServiceBusWorker.cs" />
     <Compile Include="ClientFactory.cs" />
+    <Compile Include="ICreateClients.cs" />
     <Compile Include="InstanceAttribute.cs" />
     <Compile Include="IStartupTask.cs" />
     <Compile Include="MultiBaseBindingGenerator.cs" />

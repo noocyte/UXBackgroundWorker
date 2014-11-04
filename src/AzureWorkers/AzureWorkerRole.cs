@@ -17,11 +17,6 @@ namespace Proactima.AzureWorkers
         private IKernel _kernel;
         private List<Task> Tasks { get; set; }
 
-        protected virtual int TaskTimeout
-        {
-            get { return 30; }
-        }
-
         [Inject]
         public List<IStartupTask> Starters { get; set; }
 
