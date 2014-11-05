@@ -47,8 +47,7 @@ namespace Proactima.AzureWorkers
                 if (message == null) continue;
 
                 var messageBody = message.GetBody<string>();
-                if (String.IsNullOrEmpty(messageBody))
-                    messageBody = String.Empty;
+                if (String.IsNullOrEmpty(messageBody)) continue;
 
                 var messageId = message.MessageId;
                 message.Complete();
