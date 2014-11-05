@@ -77,9 +77,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
     </Reference>
-    <Reference Include="Ninject.Extensions.Azure.Clients">
-      <HintPath>..\packages\Ninject.Extensions.Azure.Clients.1.0.0.8\lib\net451\Ninject.Extensions.Azure.Clients.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Ninject.Extensions.Azure.Clients, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Ninject.Extensions.Azure.Clients.1.0.0.9\lib\net451\Ninject.Extensions.Azure.Clients.dll</HintPath>
     </Reference>
     <Reference Include="Ninject.Extensions.Conventions, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
