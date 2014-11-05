@@ -8,10 +8,10 @@ namespace Proactima.AzureWorkers
 {
     public abstract class BaseServiceBusTopicWorker : BaseWorker
     {
-        private readonly ICreateClients _clientFactory;
+        private readonly ICreateClientsAsync _clientFactory;
         private RetryPolicy _retryStrategy;
 
-        protected BaseServiceBusTopicWorker(ICreateClients clientFactory)
+        protected BaseServiceBusTopicWorker(ICreateClientsAsync clientFactory)
         {
             _clientFactory = clientFactory;
             MessageRepostMaxCount = 3;

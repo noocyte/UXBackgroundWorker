@@ -11,7 +11,8 @@ namespace ExampleWorker
     {
         private readonly List<string> _failedMessages = new List<string>();
 
-        public SimpleServicebusTopicWorker(ICreateClients clientFactory) : base(clientFactory)
+        public SimpleServicebusTopicWorker(ICreateClientsAsync clientFactory)
+            : base(clientFactory)
         {
             MessageRepostMaxCount = 4;
         }

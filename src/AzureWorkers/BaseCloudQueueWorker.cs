@@ -10,10 +10,10 @@ namespace Proactima.AzureWorkers
 {
     public abstract class BaseCloudQueueWorker : BaseWorker
     {
-        private readonly ICreateClients _clientFactory;
+        private readonly ICreateClientsAsync _clientFactory;
         private CloudQueue _queue;
 
-        public BaseCloudQueueWorker(ICreateClients clientFactory)
+        public BaseCloudQueueWorker(ICreateClientsAsync clientFactory)
         {
             _clientFactory = clientFactory;
         }

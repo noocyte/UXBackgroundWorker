@@ -10,7 +10,8 @@ namespace ExampleWorker
     {
         private readonly List<string> _failedMessages = new List<string>();
 
-        public FailingServicebusTopicWorker(ICreateClients clientFactory) : base(clientFactory)
+        public FailingServicebusTopicWorker(ICreateClientsAsync clientFactory)
+            : base(clientFactory)
         {
         }
 

@@ -8,7 +8,8 @@ namespace ExampleWorker
 {
     public class SimpleServiceBusQueueWorker : BaseServiceBusQueueWorker
     {
-        public SimpleServiceBusQueueWorker(ICreateClients clientFactory) : base(clientFactory)
+        public SimpleServiceBusQueueWorker(ICreateClientsAsync clientFactory)
+            : base(clientFactory)
         {
         }
 

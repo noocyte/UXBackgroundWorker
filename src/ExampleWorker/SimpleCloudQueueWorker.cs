@@ -8,7 +8,8 @@ namespace ExampleWorker
 {
     public class SimpleCloudQueueWorker : BaseCloudQueueWorker
     {
-        public SimpleCloudQueueWorker(ICreateClients clientFactory) : base(clientFactory)
+        public SimpleCloudQueueWorker(ICreateClientsAsync clientFactory)
+            : base(clientFactory)
         {
         }
 
