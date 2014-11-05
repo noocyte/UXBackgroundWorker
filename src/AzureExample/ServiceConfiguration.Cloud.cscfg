@@ -4,8 +4,8 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
-      <Setting name="ServiceBusConnectionString" value="yours here" />
-      <Setting name="StorageConnectionString" value="yours here" />
+      <Setting name="ServiceBusConnectionString" value="Endpoint=sb://uxriskjnydev.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=gPo5Xlu17XvGgSQCU2uQHdzZdM29jOpKhfIVN8kJ51g=" />
+      <Setting name="StorageConnectionString" value="DefaultEndpointsProtocol=https;AccountName=jnydev;AccountKey=sqHT46aJR8RsgX93g8wDAiAx2MPZ4ywF3gcR5tIDXrKBK5BqekjIVZkZOZJs8xmbiuOJ4dfus8m9pihvYEK4BQ==" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>
