@@ -23,6 +23,8 @@ namespace Proactima.AzureWorkers
         [Inject]
         public List<BaseWorker> Workers { get; set; }
 
+        protected IKernel Kernel { get { return _kernel; } }
+
         protected virtual void ErrorLogging(string message, Exception ex = null)
         {
         }
