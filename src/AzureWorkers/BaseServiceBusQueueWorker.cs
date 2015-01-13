@@ -30,6 +30,11 @@ namespace Proactima.AzureWorkers
             get { return new TimeSpan(0, 0, 5); }
         }
 
+        protected override void OnStopping()
+        {
+            _queueClient.Close();
+        }
+
         protected abstract Task Do(IEnumerable<BrokeredMessage> messages);
 
         protected override async Task StartAsync()

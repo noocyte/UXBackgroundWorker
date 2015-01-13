@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
+using Microsoft.ServiceBus.Messaging;
 using Ninject.Extensions.Azure.Clients;
 
 namespace Proactima.AzureWorkers
@@ -10,6 +11,7 @@ namespace Proactima.AzureWorkers
     {
         private readonly ICreateClientsAsync _clientFactory;
         private RetryPolicy _retryStrategy;
+        private SubscriptionClient _subClient;
 
         protected BaseServiceBusTopicWorker(ICreateClientsAsync clientFactory)
         {
@@ -32,18 +34,23 @@ namespace Proactima.AzureWorkers
 
         protected abstract Task Do(string message);
 
+        protected override void OnStopping()
+        {
+            _subClient.Close();
+        }
+
         protected override async Task StartAsync()
         {
             InfoLogging(string.Format("{0} - Processing", SubscriptionName));
 
-            var subClient = await _clientFactory.CreateSubscriptionClientAsync(TopicName, SubscriptionName).ConfigureAwait(false);
-
+            _subClient = await _clientFactory.CreateSubscriptionClientAsync(TopicName, SubscriptionName).ConfigureAwait(false);
+            
             _retryStrategy = CreateRetryPolicy(MessageRepostMaxCount);
             var stopWatch = new Stopwatch();
 
             while (!Token.IsCancellationRequested)
             {
-                var message = await subClient.ReceiveAsync(new TimeSpan(0, 0, 10)).ConfigureAwait(false);
+                var message = await _subClient.ReceiveAsync(new TimeSpan(0, 0, 10)).ConfigureAwait(false);
                 if (message == null) continue;
 
                 var messageBody = message.GetBody<string>();

@@ -59,6 +59,15 @@ namespace Proactima.AzureWorkers
         {
             if (_cancellationTokenSource != null)
                 _cancellationTokenSource.Cancel();
+            OnStopping();
+        }
+
+        /// <summary>
+        /// Will be called after cancellation token has been signaled, as the role
+        /// is shutting down.
+        /// </summary>
+        protected virtual void OnStopping()
+        {
         }
 
         /// <summary>
