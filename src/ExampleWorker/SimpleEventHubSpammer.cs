@@ -58,15 +58,6 @@ namespace ExampleWorker
             return memoryStream.ToArray();
         }
 
-        public static LogEntry FromByteArray(byte[] entry)
-        {
-            var memoryStream = new MemoryStream(entry);
-            var binaryFormatter = new BinaryFormatter();
-
-            return binaryFormatter.Deserialize(memoryStream) as LogEntry;
-        }
-
-
         public static LogEntry FromStream(Stream stream)
         {
             var binaryFormatter = new BinaryFormatter();
