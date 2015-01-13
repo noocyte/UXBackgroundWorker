@@ -20,7 +20,10 @@ namespace ExampleWorker
         {
             get { return "SimpleTopic"; }
         }
-
+        public override bool Enabled
+        {
+            get { return false; }
+        }
         protected override async Task Do(string message)
         {
             var client = new HttpClient();

@@ -17,7 +17,10 @@ namespace ExampleWorker
         {
             get { return "RandomQueue"; }
         }
-
+        public override bool Enabled
+        {
+            get { return false; }
+        }
         protected override async Task Do(IEnumerable<BrokeredMessage> messages)
         {
             await DeleteMessages(messages).ConfigureAwait(false);

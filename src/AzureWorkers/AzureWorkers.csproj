@@ -59,6 +59,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\WindowsAzure.ServiceBus.2.5.4\lib\net40-full\Microsoft.ServiceBus.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.ServiceBus.Messaging.EventProcessorHost">
+      <HintPath>..\packages\Microsoft.Azure.ServiceBus.EventProcessorHost.1.0.2.1\lib\net45-full\Microsoft.ServiceBus.Messaging.EventProcessorHost.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.2.0.3\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
     </Reference>
@@ -80,7 +83,7 @@
     </Reference>
     <Reference Include="Ninject.Extensions.Azure.Clients, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Ninject.Extensions.Azure.Clients.1.0.0.13\lib\net451\Ninject.Extensions.Azure.Clients.dll</HintPath>
+      <HintPath>..\packages\Ninject.Extensions.Azure.Clients.1.0.0.14\lib\net451\Ninject.Extensions.Azure.Clients.dll</HintPath>
     </Reference>
     <Reference Include="Ninject.Extensions.Conventions, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -114,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseCloudQueueWorker.cs" />
+    <Compile Include="BaseEventHubProcessor.cs" />
     <Compile Include="BaseServiceBusQueueWorker.cs" />
     <Compile Include="InstanceAttribute.cs" />
     <Compile Include="IStartupTask.cs" />
