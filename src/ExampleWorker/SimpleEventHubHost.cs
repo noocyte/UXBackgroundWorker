@@ -22,35 +22,51 @@ namespace ExampleWorker
                 .Select(LogEntry.FromStream)
                 .ToList()
                 .ForEach(entry => DebugWrite(context, entry));
-            
-            return Task.FromResult(0);
-        }
 
-        private static void DebugWrite(PartitionContext context, LogEntry entry)
-        {
-            Debug.WriteLine("Partition: {0}, Message: {1}", context.Lease.PartitionId, entry.Message);
+            return Task.FromResult(0);
         }
 
         public async Task CloseAsync(PartitionContext context, CloseReason reason)
         {
             await context.CheckpointAsync();
         }
+
+        private static void DebugWrite(PartitionContext context, LogEntry entry)
+        {
+            Debug.WriteLine("Partition: {0}, Message: {1}", context.Lease.PartitionId, entry.Message);
+        }
     }
 
-    public class SimpleEventHubHost : BaseEventHubProcessor<SimpleProcessor>
+    public sealed class SimpleEventHubHost : BaseEventHubProcessor
     {
+        private readonly IEventProcessorFactory _processorFactory;
+
         public SimpleEventHubHost(ICreateClients clientFactory) : base(clientFactory)
         {
+            _processorFactory = new SimpleProcessorFactory();
         }
 
-        public override string BaseHostName
+        protected override string BaseHostName
         {
             get { return "simpletest"; }
         }
 
-        public override string EventHubPath
+        protected override string EventHubPath
         {
             get { return "simpletest"; }
+        }
+
+        protected override IEventProcessorFactory ProcessorFactory
+        {
+            get { return _processorFactory; }
+        }
+
+        private class SimpleProcessorFactory : IEventProcessorFactory
+        {
+            public IEventProcessor CreateEventProcessor(PartitionContext context)
+            {
+                return new SimpleProcessor();
+            }
         }
     }
 }
