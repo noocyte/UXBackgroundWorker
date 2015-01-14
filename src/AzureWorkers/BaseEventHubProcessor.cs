@@ -5,30 +5,31 @@ using Ninject.Extensions.Azure.Clients;
 
 namespace Proactima.AzureWorkers
 {
-    public abstract class BaseEventHubProcessor<T> : BaseWorker where T : IEventProcessor
+    public abstract class BaseEventHubProcessor : BaseWorker 
     {
         private readonly ICreateClients _clientFactory;
         private EventProcessorHost _host;
 
-        public BaseEventHubProcessor(ICreateClients clientFactory)
+        protected BaseEventHubProcessor(ICreateClients clientFactory)
         {
             _clientFactory = clientFactory;
         }
 
-        public abstract string BaseHostName { get; }
-        public abstract string EventHubPath { get; }
+        protected abstract string BaseHostName { get; }
+        protected abstract string EventHubPath { get; }
+        protected abstract IEventProcessorFactory ProcessorFactory { get; }
 
-        public virtual int MaxBatchSize
+        protected virtual int MaxBatchSize
         {
             get { return 200; }
         }
 
-        public virtual TimeSpan ReceiveTimeout
+        protected virtual TimeSpan ReceiveTimeout
         {
             get { return TimeSpan.FromSeconds(5); }
         }
 
-        public virtual string ConsumerGroupName
+        protected virtual string ConsumerGroupName
         {
             get { return EventHubConsumerGroup.DefaultGroupName; }
         }
@@ -39,11 +40,9 @@ namespace Proactima.AzureWorkers
 
             if (_host == null)
                 _host = _clientFactory.CreateEventProcessorHost(EventHubPath, BaseHostName, ConsumerGroupName);
-            else // IF we loop out and come in again, make sure to shut down the host first
-                await _host.UnregisterEventProcessorAsync().ConfigureAwait(false);
 
             await _host
-                .RegisterEventProcessorAsync<T>(CreateEventProcessorOptions())
+                .RegisterEventProcessorFactoryAsync(ProcessorFactory, CreateEventProcessorOptions())
                 .ConfigureAwait(false);
 
             while (!Token.IsCancellationRequested)
