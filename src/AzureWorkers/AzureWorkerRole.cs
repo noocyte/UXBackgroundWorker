@@ -23,6 +23,14 @@ namespace Proactima.AzureWorkers
         [Inject]
         public List<BaseWorker> Workers { get; set; }
 
+        private List<BaseWorker> EnabledWorkers
+        {
+            get
+            {
+                return Workers.Where(w => w.Enabled).ToList();
+            }
+        }
+
         protected IKernel Kernel { get { return _kernel; } }
 
         protected virtual void ErrorLogging(string message, Exception ex = null)
@@ -59,10 +67,10 @@ namespace Proactima.AzureWorkers
 
         public override void Run()
         {
-            Run(Workers, Starters);
+            Run(Starters);
         }
 
-        private async void Run(IEnumerable<BaseWorker> workers, IEnumerable<IStartupTask> starters)
+        private async void Run(IEnumerable<IStartupTask> starters)
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
@@ -76,16 +84,16 @@ namespace Proactima.AzureWorkers
             InfoLogging("Finished running startup tasks...");
 
             Tasks = new List<Task>();
-            var enabledWorkers = workers.Where(w => w.Enabled).ToList();
+            
 
-            InfoLogging(String.Format("About to run {0} enabled workers...", enabledWorkers.Count));
+            InfoLogging(String.Format("About to run {0} enabled workers...", EnabledWorkers.Count));
 
-            foreach (var worker in enabledWorkers)
+            foreach (var worker in EnabledWorkers)
             {
                 Tasks.Add(worker.ProtectedRun(_cancellationTokenSource));
             }
 
-            InfoLogging(String.Format("Finished running {0} enabled workers...", enabledWorkers.Count));
+            InfoLogging(String.Format("Finished running {0} enabled workers...", EnabledWorkers.Count));
 
             int completedTaskIndex;
             while ((completedTaskIndex = Task.WaitAny(Tasks.ToArray())) != -1 && Tasks.Count > 0)
@@ -94,7 +102,7 @@ namespace Proactima.AzureWorkers
                 if (_cancellationTokenSource.Token.IsCancellationRequested) continue;
 
                 Tasks.Insert(completedTaskIndex,
-                    enabledWorkers[completedTaskIndex].ProtectedRun(_cancellationTokenSource));
+                    EnabledWorkers[completedTaskIndex].ProtectedRun(_cancellationTokenSource));
                 await Task.Delay(1000).ConfigureAwait(false);
             }
         }
@@ -117,7 +125,7 @@ namespace Proactima.AzureWorkers
 
             _cancellationTokenSource.Cancel();
 
-            foreach (var worker in Workers)
+            foreach (var worker in EnabledWorkers)
             {
                 worker.OnStop();
                 // ReSharper disable once SuspiciousTypeConversion.Global

@@ -49,6 +49,11 @@ namespace Proactima.AzureWorkers
             {
                 await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
+
+            InfoLogging("Unregistering Event Processor");
+
+            await _host.UnregisterEventProcessorAsync().ConfigureAwait(false);
+
             InfoLogging("StartAsync completes");
         }
 
@@ -60,13 +65,6 @@ namespace Proactima.AzureWorkers
                 ReceiveTimeOut = ReceiveTimeout
             };
             return eventProcessorOptions;
-        }
-
-        protected override void OnStopping()
-        {
-            InfoLogging("Unregistering event processor");
-
-            _host.UnregisterEventProcessorAsync().Wait();
         }
     }
 }
