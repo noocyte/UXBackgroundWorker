@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
+using Microsoft.Azure;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
 using Proactima.AzureWorkers;
