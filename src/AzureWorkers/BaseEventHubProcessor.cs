@@ -38,22 +38,30 @@ namespace Proactima.AzureWorkers
         {
             InfoLogging("StartAsync called");
 
-            if (_host == null)
-                _host = _clientFactory.CreateEventProcessorHost(EventHubPath, BaseHostName, ConsumerGroupName);
-
-            await _host
-                .RegisterEventProcessorFactoryAsync(ProcessorFactory, CreateEventProcessorOptions())
-                .ConfigureAwait(false);
-
-            while (!Token.IsCancellationRequested)
+            try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                if (_host == null)
+                    _host = _clientFactory.CreateEventProcessorHost(EventHubPath, BaseHostName, ConsumerGroupName);
+
+                await _host
+                    .RegisterEventProcessorFactoryAsync(ProcessorFactory, CreateEventProcessorOptions())
+                    .ConfigureAwait(false);
+
+                while (!Token.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                }
             }
-
-            InfoLogging("Unregistering Event Processor");
-
-            await _host.UnregisterEventProcessorAsync().ConfigureAwait(false);
-
+            catch (Exception exception)
+            {
+                ErrorLogging("An error happened with the EventProcessorHost", exception);
+            }
+            
+            if (_host != null)
+            {
+                InfoLogging("Unregistering Event Processor");
+                await _host.UnregisterEventProcessorAsync().ConfigureAwait(false);    
+            }
             InfoLogging("StartAsync completes");
         }
 
@@ -64,7 +72,14 @@ namespace Proactima.AzureWorkers
                 MaxBatchSize = MaxBatchSize,
                 ReceiveTimeOut = ReceiveTimeout
             };
+            eventProcessorOptions.ExceptionReceived += EventProcessorOptionsOnExceptionReceived;
             return eventProcessorOptions;
+        }
+
+        private void EventProcessorOptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs)
+        {
+            var message = String.Format("Exception from EventProcessorHost, Action was: {0}.", exceptionReceivedEventArgs.Action);
+            ErrorLogging(message, exceptionReceivedEventArgs.Exception);
         }
     }
 }
