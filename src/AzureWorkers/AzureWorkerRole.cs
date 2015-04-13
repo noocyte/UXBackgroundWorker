@@ -119,7 +119,7 @@ namespace Proactima.AzureWorkers
             return base.OnRoleStarted();
         }
 
-        protected override void OnRoleStopped()
+        protected override void OnRoleStopping()
         {
             InfoLogging("About to shutdown role...");
 
@@ -146,7 +146,6 @@ namespace Proactima.AzureWorkers
             OnRoleIsStopping();
 
             InfoLogging("Finished role shutdown...");
-            base.OnRoleStopped();
         }
 
         protected virtual void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e)
