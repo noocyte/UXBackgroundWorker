@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>AzureWorkers</id>
+    <version>2.0.7</version>
+    <authors>Jarle Nygård, Anders Østhus, Alessandro Di Gioia</authors>
+    <owners>Proactima Solutions AS</owners>
+    <licenseUrl>https://raw.github.com/proactima/AzureWorkers/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/proactima/AzureWorkers</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Basic framework for Azure Worker Role. Uses Ninject to allow for IoC in the Worker and relies on Ninject for getting potential workers and startup tasks. Uses the Task framework to run multiple tasks inside one worker.</description>
+    <releaseNotes>Minor breaking changes, bumped version to 2.0 to signal this.</releaseNotes>
+    <copyright>Copyright © Proactima Solutions AS - 2014-2015</copyright>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="6.0"/>
+      <dependency id="Ninject" version="3.2" />
+      <dependency id="Ninject.Extensions.Conventions" version="3.2" />
+      <dependency id="Ninject.Extensions.Azure.Clients" version="1.0" />
+      <dependency id="Castle.Core" version="3.3" />
+      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="3.1" />
+      <dependency id="WindowsAzure.ServiceBus" version="2.6" />
+      <dependency id="WindowsAzure.Storage" version="4.3"/>
+      <dependency id="Microsoft.Azure.ServiceBus.EventProcessorHost" version="1.1"/>
+      <dependency id="EnterpriseLibrary.TransientFaultHandling" version="6.0"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\Proactima.AzureWorkers.dll" target="lib\net451" />
+    <file src="bin\Release\Proactima.AzureWorkers.pdb" target="lib\net451" />
+    <file src="bin\Release\Proactima.AzureWorkers.XML" target="lib\net451" />
+  </files>
+</package>
